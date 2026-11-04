@@ -1,0 +1,102 @@
+%% ---------------------------------------------------------------------------
+%% Main file -- Accuracy analysis of Kirchhoff plate theory
+%% Typeset with the Elsevier CAS single-column class (cas-sc.cls).
+%% ---------------------------------------------------------------------------
+%% Document class
+%\documentclass[a4paper,fleqn,longmktitle]{cas-sc}
+\documentclass[a4paper,fleqn]{cas-sc}
+
+%% ---------------------------------------------------------------------------
+%% Bibliography: numeric citations, sorted and compressed (e.g. [1-7])
+%% ---------------------------------------------------------------------------
+%\usepackage[numbers]{natbib}
+\usepackage[numbers,sort&compress]{natbib}
+
+%% ---------------------------------------------------------------------------
+%% Mathematics
+%% ---------------------------------------------------------------------------
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{bm}
+
+%% ---------------------------------------------------------------------------
+%% Graphics, tables and lists
+%% ---------------------------------------------------------------------------
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+
+%% ---------------------------------------------------------------------------
+%% Author macros (as in the CAS sample file)
+%% ---------------------------------------------------------------------------
+\def\tsc#1{\csdef{#1}{\textsc{\lowercase{#1}}\xspace}}
+\tsc{WGM}
+\tsc{QE}
+\tsc{EP}
+\tsc{PMS}
+\tsc{BEC}
+\tsc{DE}
+
+%% Frequently used notation shortcuts
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\A}{\mathrm{A}}
+\newcommand{\F}{\mathrm{F}}
+\newcommand{\B}{\mathrm{B}}
+\newcommand{\bA}{\mathbf{A}}
+\newcommand{\bB}{\mathbf{B}}
+\newcommand{\bF}{\mathbf{F}}
+\newcommand{\bD}{\mathbf{D}}
+\newcommand{\bN}{\mathbb{N}}
+\newcommand{\bP}{\mathbb{P}}
+\newcommand{\sk}{\operatorname{span}}
+\newcommand{\supp}{\operatorname{supp}}
+\newcommand{\bt}[1]{\tilde{#1}}
+
+\begin{document}
+\let\WriteBookmarks\relax
+\def\floatpagepagefraction{1}
+\def\textpagefraction{.001}
+\shorttitle{Accuracy analysis of Kirchhoff plate theory}
+\shortauthors{H.~Du et~al.}
+
+%% ---------------------------------------------------------------------------
+%% Front matter
+%% ---------------------------------------------------------------------------
+\title[mode = title]{Accuracy analysis of Kirchhoff plate theory}
+
+%% NOTE: author names, affiliations and funding information were not available
+%% in the source Word file.  Please complete the fields below.
+\author[1]{First A. Author}[type=editor,
+                        auid=000,bioid=1,
+                        role=Researcher,
+                        orcid=0000-0000-0000-0000]
+\cormark[1]
+\ead{author@example.edu}
+
+\affiliation[1]{organization={Department of Engineering Mechanics},
+                city={City},
+                postcode={000000},
+                country={China}}
+
+\cortext[cor1]{Corresponding author}
+
+%% ---------------------------------------------------------------------------
+%% Body -- one file per section
+%% ---------------------------------------------------------------------------
+\input{sections/00_abstract}
+\maketitle
+
+\input{sections/01_introduction}
+\input{sections/02_formulation}
+\input{sections/03_error_estimate}
+\input{sections/04_numerical_results}
+\input{sections/05_conclusions}
+
+%% ---------------------------------------------------------------------------
+%% Bibliography
+%% ---------------------------------------------------------------------------
+\input{sections/99_references}
+
+\end{document}
