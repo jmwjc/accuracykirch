@@ -1,0 +1,34 @@
+% !TEX root = ../main.tex
+
+\section{Variationally--consistent reproducing kernel gradient smoothing meshfree method}
+To verify the proposed estimator of Eqs. \eqref{h2_standard}, the reproducing kernel gradient smoothing integration (RKGSI) method weak form is used herein. 
+This method is based on Hellinger--Reissner weak form,
+\begin{equation}
+	\begin{aligned}
+		\Pi(M_{ij},w) &= \int_\Omega \frac{1}{2} M_{ij} C_{ijkl}^{-1} M_{kl} d\Omega
+		- \int_{\Gamma_{w}} V \bar w d\Gamma + \int_{\Gamma_{\theta}} M_n \bar \theta_n d\Gamma - F \bar w \Vert_{\boldsymbol x \in c_w} \\
+		&+ \int_\Omega w(M_{ij,ij} + \bar q) d\Omega + \int_{\Gamma_{M}} w_{,i} n_i (M_n-\bar M_n) d\Gamma - \int_{\Gamma_{V}} w(V-\bar V) d\Gamma - w(P-\bar P)\vert_{\boldsymbol x\in c_p}
+	\end{aligned}
+\end{equation}
+\begin{equation}
+	\begin{aligned}
+		\int_\Omega \delta M_{ij} D^{-1}_{ijkl}M_{kl} d\Omega &= \int_{\Gamma_{V}} \delta V_n w d\Gamma - \int_{\Gamma} \delta M_n w_{,i} n_i d\Gamma + \delta P w \vert_{\boldsymbol x \in c} - \int_\Omega \delta M_{ij,ij} w d\Omega \\
+		&- \int_{\Gamma_{w}} \delta V w d\Gamma + \int_{\Gamma_{\theta}} \delta M_n w_{,i} n_i d\Gamma - \delta P w\vert_{\boldsymbol x \in c_w} \\
+		&+ \int_{\Gamma_{w}} \delta V \bar w d\Gamma - \int_{\Gamma_{\theta}} \delta M_n \bar \theta_n d\Gamma + \delta P \bar w \vert_{\boldsymbol x \in c_w}
+	\end{aligned}
+\end{equation}
+\begin{multline}
+	\int_\Gamma \delta w V d\Gamma - \int_\Gamma \delta w_{,i} n_i M_n d\Gamma + \delta w P \vert_{\boldsymbol x \in c} - \int_\Omega \delta w M_{ij,ij} \Omega
+	-\int_{\Gamma_{w}} \delta w V d\Gamma + \int_\Gamma \delta w_{,i} n_i M_n d\Gamma - \delta w P \vert_{\boldsymbol x \in c_w} \\
+	= \int_{\Gamma_{V}} \delta w \bar V d\Gamma - \int_{\Gamma_{M}} \delta w_{,i} n_i \bar M_n d\Gamma + \delta w \bar P \vert_{\boldsymbol x \in c_P} + \int_\Omega \delta w \bar q d\Omega
+\end{multline}
+\begin{equation}\label{strong_mix}
+\begin{cases}
+-M_{ij,ij}=q & \text{in }\Omega\\
+w=\bar{w} & \text{on }\Gamma_{w}\\
+w_{,n_i}=\bar{\theta}_{n} & \text{on }\Gamma_{\theta}\\
+M_{ij,j}n_i+M_{ns,s}=\bar{V} & \text{on }\Gamma_{V}\\
+M_{ij}n_in_j=\bar{M}_{n} & \text{on }\Gamma_{M}\\
+[M_{ns}]=\bar{F}_{c} & \text{at}\;c_P
+\end{cases}
+\end{equation}

@@ -1,0 +1,252 @@
+% !TEX root = ../main.tex
+\section{Variational consistency of Kirchhoff plate Galerkin meshfree formulation}\label{sec:formulation}
+
+\subsection{Galerkin weak form of the Kirchhoff plate problem}\label{sec:weakform}
+
+In accordance with the Kirchhoff--Love plate theory \cite{}, the equilibrium equation and the boundary conditions of an elastic plate occupying the domain $\Omega$ with boundary $\Gamma$ can be stated as follows:
+\begin{equation}\label{strong}
+	\begin{cases}
+		\bar D w_{,iijj}=\bar q & \text{in}\;\Omega\\
+		w=\bar{w} & \text{on}\;\Gamma_{w}\\
+		\theta_n(w)=w_{,i} n_i=\bar{\theta}_{n} & \text{on}\;\Gamma_{\theta}\\
+		w=\bar{w} & \text{at}\;c_w\\
+		V(w)=-\bar D\left(w_{,jji} n_i+(1-\nu)\left(w_{,ij} n_i s_j\right)_{,s}\right)=\bar{V} & \text{on}\;\Gamma_{V}\\
+		M_n(w)=-\bar D\left(w_{,ij} n_i n_j+\nu w_{,ij} s_i s_j\right)=\bar{M}_{n} & \text{on}\;\Gamma_{M}\\
+		P(w)=-\bar D(1-\nu)\left[w_{,ij} n_i s_j\right]=\bar{P}_{c} & \text{at}\;c_P
+	\end{cases}
+\end{equation}
+where the subscript comma of $w_{,i}$ denotes the partial derivative of $w$ with respect to the $i$-th spatial coordinate, $i=1,2$. $\bar D$ denotes the bending rigidity and it can be expressed by Young's modulus $E$, Poisson ratio $\nu$ and plate thickness $t$ as:
+\begin{equation}
+	\bar D=\frac{Et^{3}}{12(1-\nu^{2})}
+\end{equation}
+and $\bar q$ the distributed transverse load on the plate.
+$\Gamma_{w}$ and $\Gamma_{\theta}$ denote the displacement and slope boundaries, $\bar{w}$ and $\bar{\theta}_{n}$ are the corresponding given values.
+$\boldsymbol{n}=\{n_i\}$ and $\boldsymbol{s}=\{s_i\}$ represent the boundary outward normal and tangent.
+$\bar{V}$ and $\bar{M}_{n}$ denote the prescribed equivalent shear force and normal bending moment on the natural boundaries $\Gamma_{V}$ and $\Gamma_{M}$, respectively.
+$c_w$ collects the corner points on $\Gamma_{w}$, and $c_P$ collects the corner points where the concentrated corner force $\bar{P}_{c}$ is prescribed.
+The above boundary segments cover the whole boundary and the corner points of $\Gamma$, denoted by $c$, are shared by them, i.e.
+\begin{equation}\label{boundary_relations}
+	\Gamma_{w}\cup\Gamma_{V}=\Gamma_{\theta}\cup\Gamma_{M}=\Gamma,\qquad c_w\cup c_P=c
+\end{equation}
+With the above boundary conditions, the total potential energy functional of the Kirchhoff plate can be expressed as:
+\begin{equation}\label{energy_functional}
+	\Pi(w) = \int_\Omega \frac{1}{2} \boldsymbol \kappa^T \boldsymbol D \boldsymbol \kappa d\Omega
+	- \int_{\Gamma_{V}} w \bar V d\Gamma
+	+ \int_{\Gamma_{M}} \theta_n \bar M_n d\Gamma
+	- w \bar P_c\vert_{\boldsymbol x \in c_P}
+	- \int_\Omega w \bar q d\Omega
+\end{equation}
+where $\boldsymbol \kappa$ denotes the curvature vector and $\boldsymbol D$ the elasticity matrix of the plate in Voigt notation, which are expressed by the deflection $w$ as:
+\begin{equation}\label{curvature}
+	\boldsymbol \kappa=-\left\{w_{,xx},\ w_{,yy},\ 2w_{,xy}\right\}^{T},\quad
+	\boldsymbol D=\bar D\begin{pmatrix}1 & \nu & 0\\ \nu & 1 & 0\\ 0 & 0 & \frac{1-\nu}{2}\end{pmatrix}
+\end{equation}
+Using a standard variation operator, i.e. $\delta \Pi (w) = 0$, Eq. \eqref{energy_functional} turns into the variational problem:
+\begin{equation}\label{weakform}
+	\textrm{Find}\; w \in H_2: \quad a(\delta w, w) = f(\delta w) ,\quad \forall \delta w \in H_2
+\end{equation}
+with
+\begin{equation}\label{bilinear}
+	a(\delta w, w) = \int_\Omega \delta \boldsymbol \kappa^T \boldsymbol D \boldsymbol \kappa d\Omega
+\end{equation}
+\begin{equation}\label{linear}
+	f(\delta w) =
+	\int_{\Gamma_{V}} \delta w \bar V d\Gamma
+	- \int_{\Gamma_{M}} \theta_n(\delta w) \bar M_n d\Gamma
+	+ \delta w \bar P_c\vert_{\boldsymbol x \in c_P}
+	+ \int_\Omega \delta w \bar q d\Omega
+\end{equation}
+The above variational problem is well posed provided that the bilinear form $a(\cdot,\cdot)$ is continuous and coercive \cite{}, i.e. there exist two constants $\gamma,\alpha>0$, independent of the nodal distance $h$, such that
+
+\begin{itemize}
+\item Continuity
+\begin{equation}\label{continuity}
+	\left| a(\delta w, w) \right| \le \gamma \Vert \delta w \Vert_{H_2} \Vert w \Vert_{H_2}, \quad \forall \delta w, w \in H_2
+\end{equation}
+
+\item Coercivity
+\begin{equation}\label{coercivity}
+	a(w, w) \ge \alpha \Vert w \Vert_{H_2}^2, \quad \forall w \in H_2
+\end{equation}
+\end{itemize}
+It should be noted that these two properties are the two important conditions for deriving the error estimates of the Galerkin meshfree formulation in what follows.
+
+\subsection{Reproducing kernel meshfree approximation and consistency condition}\label{sec:mls}
+
+In reproducing kernel (RK) meshfree approximation \cite{}, a group of nodes $\{\boldsymbol x_I\}_{I=1}^{n_p}$ is adopted to discretize the problem domain $\Omega$ and the corresponding boundary $\Gamma$, where $n_p$ stands for the total number of meshfree nodes.
+The meshfree approximation of the deflection $w(\boldsymbol x)$ $\approx$ $w^{h}(\boldsymbol x)$ is given by:
+\begin{equation}\label{approx}
+	w^{h}(\boldsymbol x)=\sum_{I=1}^{n_p}\Psi_I(\boldsymbol x) d_I
+\end{equation}
+with
+\begin{equation}\label{shape}
+	\Psi_I(\boldsymbol x)=\boldsymbol p^{[p]T}(\boldsymbol x_I-\boldsymbol x) \boldsymbol c(\boldsymbol x) \varphi(\boldsymbol x_I-\boldsymbol x)
+\end{equation}
+where $d_I$ is the nodal displacement coefficient related to the node $\boldsymbol x_I$, and $\Psi_I(\boldsymbol x)$ is the RK shape function associated with the node $\boldsymbol x_I$ and its compact support domain $\operatorname{supp}(\boldsymbol x_I)$, such that $\Omega\subseteq\bigcup_{I=1}^{n_p}\operatorname{supp}(\boldsymbol x_I)$.
+$\boldsymbol p^{[p]}$ in Eq. \eqref{shape} is the $p$-degree monomial basis vector, which is defined as:
+\begin{equation}\label{monomial}
+	\boldsymbol p^{[p]}(\boldsymbol x)=\left\{1,\ x,\ y,\ \cdots,\ x^{i}y^{j},\ \cdots,\ y^{p}\right\}^{T},\quad 0\le i+j\le p
+\end{equation}
+It is noted that the compact support $\operatorname{supp}(\boldsymbol x_I)$ comes from the kernel function $\varphi(\boldsymbol x_I-\boldsymbol x)$.
+Specifically, the quintic B-spline function \cite{} adopted for constructing the quadratic, cubic and quartic meshfree approximants can be stated as follows:
+\begin{equation}\label{kernel}
+	\varphi(r)=\frac{1}{5!}\begin{cases}
+		(3-3r)^5 - 6(2-3r)^5 + 15(1-3r)^5, & r\le \frac{1}{3} \\
+		(3-3r)^5 - 6(2-3r)^5, & \frac{1}{3} < r\le \frac{2}{3} \\
+		(3-3r)^5, & \frac{2}{3} < r\le 1 \\
+		0, & r> 1 \\
+	\end{cases}
+\end{equation}
+with $r=|\boldsymbol x_I-\boldsymbol x|/s$ being the relative distance between the node $\boldsymbol x_I$ and the evaluated point $\boldsymbol x$, and $s$ is the size of the influence domain.
+
+The unknown vector $\boldsymbol c(\boldsymbol x)$ in Eq. \eqref{shape} is determined by the following $p$-th order consistency conditions:
+\begin{equation}\label{consistency}
+	\sum_{I=1}^{n_p}\Psi_I(\boldsymbol x) \boldsymbol p^{[p]}(\boldsymbol x_I-\boldsymbol x)=\boldsymbol p^{[p]}(\boldsymbol 0)
+\end{equation}
+Substituting Eq. \eqref{shape} into Eq. \eqref{consistency}, $\boldsymbol c(\boldsymbol x)$ takes the following form:
+\begin{equation}\label{coef}
+	\boldsymbol c(\boldsymbol x)=\boldsymbol A^{-1}(\boldsymbol x) \boldsymbol p^{[p]}(\boldsymbol 0)
+\end{equation}
+where $\boldsymbol A(\boldsymbol x)$ is the so-called moment matrix:
+\begin{equation}\label{moment}
+	\boldsymbol A(\boldsymbol x)=\sum_{I=1}^{n_p}\boldsymbol p^{[p]}(\boldsymbol x_I-\boldsymbol x) \boldsymbol p^{[p]T}(\boldsymbol x_I-\boldsymbol x) \varphi(\boldsymbol x_I-\boldsymbol x)
+\end{equation}
+Then, combining Eq. \eqref{coef} with Eq. \eqref{moment} yields the following expression of the RK shape functions:
+\begin{equation}\label{shape_final}
+	\Psi_I(\boldsymbol x)=\boldsymbol p^{[p]T}(\boldsymbol 0) \boldsymbol A^{-1}(\boldsymbol x) \boldsymbol p^{[p]}(\boldsymbol x_I-\boldsymbol x) \varphi(\boldsymbol x_I-\boldsymbol x)
+\end{equation}
+The meshfree approximation space associated with the RK shape functions is defined as:
+\begin{equation}\label{space}
+	W^h=\operatorname{span}\{\Psi_I\}_{I=1}^{n_p}
+\end{equation}
+By virtue of the consistency condition \eqref{consistency}, the RK approximation exactly reproduces any polynomial of degree up to $p$, which leads to the following interpolation error estimate \cite{}:
+\begin{equation}\label{interpolation}
+	\Vert w - \mathcal I^p w \Vert_{H_k} \le C h^{l-k+1} \vert w \vert_{H_{l+1}}, \quad \forall k \le l+1,\ l \le \min\{p,m\}
+\end{equation}
+where $\mathcal I^p w\in W^h$ denotes the RK interpolant of $w$, $m$ is the integer such that $w\in H^{m+1}(\Omega)$, and $C$ is a positive constant independent of the nodal distance $h$, which however depends on the normalized support size $s/h$ and the kernel function.
+
+\subsection{Variational consistency and orthogonality}\label{sec:gauss}
+
+Introducing the approximation, like the RK approximation introduced in the previous section, into the variational problem \eqref{weakform} leads to the following Ritz-Galerkin problem:
+\begin{equation}\label{discrete}
+	\textrm{Find}\; w^h \in W^h: \quad a(\delta w^h, w^h) = f(\delta w^h), \quad \forall \delta w^h \in W^h
+\end{equation}
+It is noted that the accuracy of the Ritz--Galerkin problem \eqref{discrete} is governed not only by the consistency condition, i.e. the interpolation error estimate \eqref{interpolation} presented in the previous section, but also by another requirement, i.e. the variational consistency \cite{}, which plays a crucial role in the convergence property of Galerkin methods.
+A numerical method with approximation space $W^h$ is said to fulfill the $q$-th order variational consistency \cite{} if, while all boundary conditions and external forces are evaluated by arbitrary $q$-th order polynomials, i.e. $v \in P^q$ with $P^q = \operatorname{span}\boldsymbol p^{[q]}$, the following identity holds for a $v \in P^q$:
+\begin{equation}\label{variational_consistency}
+	a(\delta w^h, v) = b(\delta w^h, v),\quad \forall \delta w^h \in W^h
+\end{equation}
+where $b$ is an identical functional with $f$ except that the external forces in $f$ are implemented by $v$, as:
+\begin{equation}\label{functional_b}
+	b(\delta w, v) =
+	\int_{\Gamma_{V}} \delta w V(v) d\Gamma
+	- \int_{\Gamma_{M}} \theta_n(\delta w) M_n(v) d\Gamma
+	+ \delta w P(v)\vert_{\boldsymbol x \in c_P}
+	+ \int_\Omega \delta w v_{,iijj} d\Omega
+\end{equation}
+
+It is noted that the variational consistency of a numerical method is governed by two issues, namely the consistency of the numerical integration and the way in which the essential boundary conditions are imposed.
+Most of traditional numerical approximations \cite{}, like finite element methods, have the Kronecker delta property, i.e. $\Psi_I(\boldsymbol x_J) = \delta_{IJ}$.
+For these schemes, the essential boundary conditions can be imposed directly, i.e. $\delta w^h=\theta_n(\delta w^h)=0$ as $\boldsymbol x \in \Gamma_{w} \cup \Gamma_{\theta}$, such that Eq. \eqref{variational_consistency} holds for an arbitrary order $q$.
+Thereby the boundary integrals in Eq. \eqref{functional_b} can be extended from $\Gamma_{V}$ and $\Gamma_{M}$ to the whole boundary $\Gamma$, and Eq. \eqref{functional_b} can be simplified as:
+\begin{equation}\label{functional_b_fem}
+	b(\delta w^h, v) =
+	\int_{\Gamma} \delta w^h V(v) d\Gamma
+	- \int_{\Gamma} \theta_n(\delta w^h) M_n(v) d\Gamma
+	+ \delta w^h P(v)\vert_{\boldsymbol x \in c_P}
+	+ \int_\Omega \delta w^h v_{,iijj} d\Omega
+\end{equation}
+Substituting Eq. \eqref{functional_b_fem} into Eq. \eqref{variational_consistency}, the variational consistency of the finite element scheme can be verified for an arbitrary order $q$ by the integration by parts.
+Since $b(\delta w^h, w)=f(\delta w^h)$ holds for the exact solution $w\in H_2$, the exact solution satisfies the same discrete equation:
+\begin{equation}\label{weakform_residual}
+	a(\delta w^h, w) = b(\delta w^h, w) = f(\delta w^h), \quad \forall \delta w^h \in W^h
+\end{equation}
+Meanwhile, the discrete solution $w^h$ satisfies Eq. \eqref{discrete} as well.
+Subtracting the two equations from each other gives the orthogonality condition:
+\begin{equation}\label{orthogonality}
+	a(\delta w^h, w - w^h) = 0, \quad \forall \delta w^h \in W^h
+\end{equation}
+Thus the orthogonality condition is fully satisfied for FEM.
+
+In contrast to the RK approximation, its shape function can not ensure the Kronecker delta property, $\Psi_I(\boldsymbol x_J) \neq \delta_{IJ}$.
+Applying the essential boundary conditions directly like FEM can no longer fulfill the variational consistency of Eq. \eqref{variational_consistency} for an arbitrary order $q$, and thus the orthogonality condition \eqref{orthogonality} is lost.
+The variationally-consistent imposition method should be employed herein.
+One of the most frequently-used methods is the Nitsche method \cite{}.
+The Nitsche method adds consistent terms and stabilized terms in energy functional:
+\begin{equation}\label{nitsche_functional}
+	\begin{aligned}
+		\bar \Pi(w) = \Pi(w) &\underbrace{- \int_{\Gamma_{w}} V(w)(w - \bar w) d\Gamma + \int_{\Gamma_{\theta}} M_{n}(w)(\theta_n(w) - \bar \theta_n) d\Gamma - P(w)(w - \bar w)\vert_{\boldsymbol x \in c_w}}_{\textrm{Variational terms}} \\
+		&\underbrace{+ \frac{\alpha_w}{2} \int_{\Gamma_{w}} (w - \bar w)^2 d\Gamma + \frac{\alpha_\theta}{2} \int_{\Gamma_{\theta}} (\theta_n(w) - \bar \theta_n)^2 d\Gamma + \frac{\alpha_c}{2} (w - \bar w)^2\vert_{\boldsymbol x \in c_w}}_{\textrm{Stabilized terms}}
+	\end{aligned}
+\end{equation}
+where $\alpha_w\propto\bar D/h^{3}$, $\alpha_\theta\propto\bar D/h$ and $\alpha_c\propto\bar D/h^{2}$ are the artificial stabilization parameters, which are determined empirically.
+With a standard variational operation, the variational problem of Eq. \eqref{nitsche_functional} becomes:
+\begin{equation}\label{nitsche_weakform}
+	\textrm{Find} \; w^h \in W^h: \quad \bar a(\delta w^h, w^h) = \bar f(\delta w^h), \quad \forall \delta w^h \in W^h
+\end{equation}
+where $\bar a$ and $\bar f$ denote the bilinear and linear functionals associated with $\bar \Pi(w)$, respectively, i.e.
+\begin{equation}\label{nitsche_bilinear}
+	\begin{aligned}
+		\bar a(\delta w^h, w^h) ={}& a(\delta w^h, w^h)
+		- \int_{\Gamma_{w}} \left( V(\delta w^h) w^h + V(w^h) \delta w^h \right) d\Gamma \\
+		&+ \int_{\Gamma_{\theta}} \left( M_n(\delta w^h) \theta_n(w^h) + M_n(w^h) \theta_n(\delta w^h) \right) d\Gamma 
+		- \left( P(\delta w^h) w^h + P(w^h) \delta w^h \right) \vert_{\boldsymbol x \in c_w} \\
+		&+ \alpha_w \int_{\Gamma_{w}} \delta w^h w^h d\Gamma + \alpha_\theta \int_{\Gamma_{\theta}} \theta_n(\delta w^h) \theta_n(w^h) d\Gamma + \alpha_c \delta w^h w^h \vert_{\boldsymbol x \in c_w}
+	\end{aligned}
+\end{equation}
+\begin{equation}\label{nitsche_linear}
+	\begin{aligned}
+		\bar f(\delta w^h) ={}& f(\delta w^h)
+		+ \int_{\Gamma_{w}} V(\delta w^h) \bar w d\Gamma
+		- \int_{\Gamma_{\theta}} M_n(\delta w^h) \bar \theta_n d\Gamma
+		+ P(\delta w^h) \bar w \vert_{\boldsymbol x \in c_w} \\
+		&- \alpha_w \int_{\Gamma_{w}} \delta w^h \bar w d\Gamma
+		- \alpha_\theta \int_{\Gamma_{\theta}} \theta_n(\delta w^h) \bar \theta_n d\Gamma
+		- \alpha_c \delta w^h \bar w \vert_{\boldsymbol x \in c_w}
+	\end{aligned}
+\end{equation}
+
+In this context, the variational consistency becomes:
+For a $v\in P^q$,
+\begin{equation}\label{nitsche_consistency}
+	\bar a(\delta w^h, v) = \bar b(\delta w^h, v), \quad \forall \delta w^h \in W^h
+\end{equation}
+and $\bar b$ denotes the counterpart of $\bar f$ with all the prescribed values implemented by a polynomial $v\in P^q$.
+As a result, the consistent term ensures the possibility of enforcement of variational consistency, and the stabilized term recovers the coercivity that is polluted by the consistent term, as:
+\begin{equation}\label{nitsche_coercivity}
+	\bar a(w, w) \ge \alpha \Vert w \Vert_{H_2}^2,\quad \forall w \in H_2
+\end{equation}
+
+However, the combination of Gauss quadrature rule and Nitsche method has its problem.
+First, the Gauss quadrature rule can not reach the designated accuracy \cite{}, because the overlapping of support size of meshfree shape functions, the shape functions are always the piecewise polynomials and the Gauss quadrature rule is only suitable for polynomial integrals.
+As a consequence, the Nitsche formulation can only ensure Eq. \eqref{nitsche_consistency} up to a limited order $q$, which is equal to the order of integration consistency of the quadrature scheme, instead of for an arbitrary order.
+Second, as can be found in the weak form of Nitsche method, the operation requires the calculation of third derivatives of shape function to evaluate $V$, and the higher-order derivatives of shape functions are complicated and costly.
+For the exact solution $w\in H_2$, which is generally not a polynomial, the residual of Eq. \eqref{nitsche_weakform} therefore does not vanish.
+To estimate this residual, the $q$-th order Lagrange interpolant $\mathcal T^{q}w$ of $w$ based upon the integration cells is introduced, which satisfies the following estimate \cite{ref50}:
+\begin{equation}\label{lagrange_error}
+	\Vert w-\mathcal T^{q}w \Vert_{H_{k}}\le C h^{l-k+1}\vert w \vert_{H_{l+1}},\quad \forall k\le l+1,\ l\le\min\{q,m\}
+\end{equation}
+Since $\mathcal T^{q}w\in P^q$, taking $v=\mathcal T^{q}w$ in Eq. \eqref{nitsche_consistency} gives
+\begin{equation}\label{nitsche_consistency_poly}
+	\bar a(\delta w^h, \mathcal T^q w) = \bar b(\delta w^h, \mathcal T^q w), \quad \forall \delta w^h \in W^h
+\end{equation}
+Meanwhile, since $w$ is the exact solution, $\bar b(\delta w^h, w)$ coincides with $\bar f(\delta w^h)$.
+Thereby the residual of Eq. \eqref{nitsche_weakform} can be recast as
+\begin{equation}\label{defect}
+	\bar a(\delta w^h, w) - \bar f(\delta w^h)
+	= \bar a(\delta w^h, w) - \bar b(\delta w^h, w) 
+	= \bar a(\delta w^h, w - \mathcal T^q w) - \bar b(\delta w^h, w - \mathcal T^q w)
+\end{equation}
+where the last equality follows from subtracting Eq. \eqref{nitsche_consistency_poly} from the residual.
+Following the continuity of $\bar a$ and $\bar b$, the two terms in Eq. \eqref{defect} are bounded by
+\begin{equation}\label{defect_bound}
+	\left| \bar a(\delta w^h, w - \mathcal T^q w) \right| \le C \Vert \delta w^h \Vert_{H_2} \Vert w - \mathcal T^q w \Vert_{H_2}
+\end{equation}
+\begin{equation}\label{defect_bound_b}
+	\left| \bar b(\delta w^h, w - \mathcal T^q w) \right| \le C \Vert \delta w^h \Vert_{H_2} \Vert w - \mathcal T^q w \Vert_{H_2}
+\end{equation}
+Substituting Eq. \eqref{lagrange_error} with $k=2$ into Eqs. \eqref{defect_bound} and \eqref{defect_bound_b}, and noting $\bar a(\delta w^h, w^h)=\bar f(\delta w^h)$, the residual \eqref{defect} reduces to the following orthogonality estimate of the Galerkin meshfree formulation:
+\begin{equation}\label{orthogonality_estimate}
+	\left| \bar a(\delta w^h, w - w^h) \right| \le C h^{l-1} \Vert \delta w^h \Vert_{H_2} \vert w \vert_{H_{l+1}}, \quad \forall l \le \min\{q,m\}
+\end{equation}
+Eq. \eqref{orthogonality_estimate} measures the loss of the Galerkin orthogonality condition \eqref{orthogonality} induced by the variational inconsistency, and it will serve as a basic ingredient of the error estimates developed in Section \ref{sec:error}.

@@ -1,0 +1,43 @@
+% !TEX root = ../main.tex
+\section{Aubin--Nitsche trick for $H_2$ problem}
+This appendix presents the Aubin--Nitsche trick method for the $H_2$--elliptic variational problem.
+This Aubin--Nitsche trick will be used to establish the relationship among the $H_2$-error, $H_1$-error and $L_2$-error in Kirchhoff plate formulation.
+
+\subsection{$L_2$-error estimator}
+Suppose that the following second order problem is introduced herein as the duality problem of Nitsche trick.
+\begin{equation}
+	a(v,u) = (v,e), \quad \forall v \in H_2
+\end{equation}
+while $\Delta^2 u = e$ in $\Omega$, and $e = w-w_h \in H_2$.
+According to closed graph theorem, we have:
+\begin{equation}
+	\vert u \vert_{H_k} \le C \Vert e \Vert_{L_2}, \quad \forall k \le 4
+\end{equation}
+
+\begin{equation}
+	\begin{aligned}
+		\Vert e \Vert_{L_2}^2 &= (e,e)_{L_2} = a(e,u) & \\
+		&= a(e,u - \mathcal I^p u) & (\textrm{Orthogonality of \eqref{orthogonality_std}}) \\
+		&\le C \Vert e \Vert_{H_2} \Vert u - \mathcal I^p u \Vert_{H_2} & (\textrm{Continuousity of \eqref{continuity}})
+	\end{aligned}
+\end{equation}
+
+\begin{equation}
+	\Vert u - \mathcal I^p u \Vert_{H_2} \le C h^{l-1} \vert u \vert_{H_{l+1}}, \quad \forall l \le p
+\end{equation}
+
+
+As $p=2$,
+\begin{equation}
+	\Vert e \Vert_{L_2}^2 = C h \Vert e \Vert_{H_2} \vert u \vert_3
+	\le C h \Vert e \Vert_{H_2} \Vert e \Vert_{L_2} 
+	\Rightarrow \Vert e \Vert_{L_2} = C h \Vert e \Vert_{H_2}
+\end{equation}
+As $p>2$,
+\begin{equation}
+	\Vert e \Vert_{L_2}^2 = C h^2 \Vert e \Vert_{H_2} \vert u \vert_4
+	\le C h^2 \Vert e \Vert_{H_2} \Vert e \Vert_{L_2} 
+	\Rightarrow \Vert e \Vert_{L_2} = C h^2 \Vert e \Vert_{H_2}
+\end{equation}
+
+\subsection{$H_1$-error estimator}

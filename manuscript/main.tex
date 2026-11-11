@@ -39,21 +39,6 @@
 \tsc{BEC}
 \tsc{DE}
 
-%% Frequently used notation shortcuts
-\newcommand{\dd}{\mathrm{d}}
-\newcommand{\A}{\mathrm{A}}
-\newcommand{\F}{\mathrm{F}}
-\newcommand{\B}{\mathrm{B}}
-\newcommand{\bA}{\mathbf{A}}
-\newcommand{\bB}{\mathbf{B}}
-\newcommand{\bF}{\mathbf{F}}
-\newcommand{\bD}{\mathbf{D}}
-\newcommand{\bN}{\mathbb{N}}
-\newcommand{\bP}{\mathbb{P}}
-\newcommand{\sk}{\operatorname{span}}
-\newcommand{\supp}{\operatorname{supp}}
-\newcommand{\bt}[1]{\tilde{#1}}
-
 \begin{document}
 \let\WriteBookmarks\relax
 \def\floatpagepagefraction{1}
@@ -64,7 +49,7 @@
 %% ---------------------------------------------------------------------------
 %% Front matter
 %% ---------------------------------------------------------------------------
-\title[mode = title]{Accuracy analysis of Kirchhoff plate theory}
+\title[mode = title]{An error estimator of Kirchhoff plate meshfree formulation considering the variational consistency}
 
 %% NOTE: author names, affiliations and funding information were not available
 %% in the source Word file.  Please complete the fields below.
@@ -85,18 +70,32 @@
 %% ---------------------------------------------------------------------------
 %% Body -- one file per section
 %% ---------------------------------------------------------------------------
-\input{sections/00_abstract}
+\input{sections/abstract}
 \maketitle
 
-\input{sections/01_introduction}
-\input{sections/02_formulation}
-\input{sections/03_error_estimate}
-\input{sections/04_numerical_results}
-\input{sections/05_conclusions}
+\input{sections/introduction}
+\input{sections/formulation}
+\input{sections/error_estimate}
+\input{sections/rkgsi}
+
+%% ---------------------------------------------------------------------------
+%% 4. Numerical results -- one file per example
+%% ---------------------------------------------------------------------------
+\section{Numerical results}\label{sec:numerical}
+
+\input{sections/integration_consistency}
+\input{sections/quadratic_convergence}
+\input{sections/manufactured_beam}
+\input{sections/manufactured_plate}
+
+\input{sections/conclusions}
 
 %% ---------------------------------------------------------------------------
 %% Bibliography
 %% ---------------------------------------------------------------------------
-\input{sections/99_references}
+\input{sections/references}
+
+% \appendix
+% \include{sections/nitsche}
 
 \end{document}
