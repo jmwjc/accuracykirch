@@ -8,11 +8,11 @@ In accordance with the Kirchhoff--Love plate theory \cite{}, the equilibrium equ
 	\begin{cases}
 		\bar D w_{,iijj}=\bar q & \text{in}\;\Omega\\
 		w=\bar{w} & \text{on}\;\Gamma_{w}\\
-		\theta_n(w)=w_{,i} n_i=\bar{\theta}_{n} & \text{on}\;\Gamma_{\theta}\\
+		\theta_n(w)=w_{,n}=\bar{\theta}_{n} & \text{on}\;\Gamma_{\theta}\\
 		w=\bar{w} & \text{at}\;c_w\\
-		V(w)=-\bar D\left(w_{,jji} n_i+(1-\nu)\left(w_{,ij} n_i s_j\right)_{,s}\right)=\bar{V} & \text{on}\;\Gamma_{V}\\
-		M_n(w)=-\bar D\left(w_{,ij} n_i n_j+\nu w_{,ij} s_i s_j\right)=\bar{M}_{n} & \text{on}\;\Gamma_{M}\\
-		P(w)=-\bar D(1-\nu)\left[w_{,ij} n_i s_j\right]=\bar{P}_{c} & \text{at}\;c_P
+		V(w)=-\bar D\left(w_{,iin} +(1-\nu)\left(w_{,ns}\right)_{,s}\right)=\bar{V} & \text{on}\;\Gamma_{V}\\
+		M(w)=-\bar D\left(w_{,nn}+\nu w_{,ss}\right)=\bar{M} & \text{on}\;\Gamma_{M}\\
+		P(w)=-\bar D(1-\nu)\left[w_{,ns}\right]=\bar{P} & \text{at}\;c_P
 	\end{cases}
 \end{equation}
 where the subscript comma of $w_{,i}$ denotes the partial derivative of $w$ with respect to the $i$-th spatial coordinate, $i=1,2$. $\bar D$ denotes the bending rigidity and it can be expressed by Young's modulus $E$, Poisson ratio $\nu$ and plate thickness $t$ as:
@@ -24,10 +24,16 @@ $\Gamma_{w}$ and $\Gamma_{\theta}$ denote the displacement and slope boundaries,
 $\boldsymbol{n}=\{n_i\}$ and $\boldsymbol{s}=\{s_i\}$ represent the boundary outward normal and tangent.
 $\bar{V}$ and $\bar{M}_{n}$ denote the prescribed equivalent shear force and normal bending moment on the natural boundaries $\Gamma_{V}$ and $\Gamma_{M}$, respectively.
 $c_w$ collects the corner points on $\Gamma_{w}$, and $c_P$ collects the corner points where the concentrated corner force $\bar{P}_{c}$ is prescribed.
+Since each corner point is shared by two adjacent boundary segments, the jump of a quantity $f$ across a corner point $\boldsymbol x\in c$ is defined as:
+\begin{equation}\label{jump}
+	[f(\boldsymbol x)]=f(\boldsymbol x^{+})-f(\boldsymbol x^{-})
+\end{equation}
+where $\boldsymbol x^{+}$ and $\boldsymbol x^{-}$ denote the two sides of the corner point $\boldsymbol x$ along the boundary $\Gamma$.
 The above boundary segments cover the whole boundary and the corner points of $\Gamma$, denoted by $c$, are shared by them, i.e.
 \begin{equation}\label{boundary_relations}
 	\Gamma_{w}\cup\Gamma_{V}=\Gamma_{\theta}\cup\Gamma_{M}=\Gamma,\qquad c_w\cup c_P=c
 \end{equation}
+
 With the above boundary conditions, the total potential energy functional of the Kirchhoff plate can be expressed as:
 \begin{equation}\label{energy_functional}
 	\Pi(w) = \int_\Omega \frac{1}{2} \boldsymbol \kappa^T \boldsymbol D \boldsymbol \kappa d\Omega
@@ -147,7 +153,7 @@ where $b$ is an identical functional with $f$ except that the external forces in
 
 It is noted that the variational consistency of a numerical method is governed by two issues, namely the consistency of the numerical integration and the way in which the essential boundary conditions are imposed.
 Most of traditional numerical approximations \cite{}, like finite element methods, have the Kronecker delta property, i.e. $\Psi_I(\boldsymbol x_J) = \delta_{IJ}$.
-For these schemes, the essential boundary conditions can be imposed directly, i.e. $\delta w^h=\theta_n(\delta w^h)=0$ as $\boldsymbol x \in \Gamma_{w} \cup \Gamma_{\theta}$, such that Eq. \eqref{variational_consistency} holds for an arbitrary order $q$.
+For these schemes, the essential boundary conditions can be imposed directly, i.e. $\delta w^h=0$ as $\boldsymbol x \in \Gamma_w$ and $\theta_n(\delta w^h)=0$ as $\boldsymbol x \in \Gamma_{\theta}$, such that Eq. \eqref{variational_consistency} holds for an arbitrary order $q$.
 Thereby the boundary integrals in Eq. \eqref{functional_b} can be extended from $\Gamma_{V}$ and $\Gamma_{M}$ to the whole boundary $\Gamma$, and Eq. \eqref{functional_b} can be simplified as:
 \begin{equation}\label{functional_b_fem}
 	b(\delta w^h, v) =
@@ -212,9 +218,13 @@ For a $v\in P^q$,
 	\bar a(\delta w^h, v) = \bar b(\delta w^h, v), \quad \forall \delta w^h \in W^h
 \end{equation}
 and $\bar b$ denotes the counterpart of $\bar f$ with all the prescribed values implemented by a polynomial $v\in P^q$.
-As a result, the consistent term ensures the possibility of enforcement of variational consistency, and the stabilized term recovers the coercivity that is polluted by the consistent term, as:
-\begin{equation}\label{nitsche_coercivity}
-	\bar a(w, w) \ge \alpha \Vert w \Vert_{H_2}^2,\quad \forall w \in H_2
+As a result, the consistent term ensures the possibility of enforcement of variational consistency, while the stabilized term recovers the coercivity that is polluted by the consistent term.
+Consequently, the bilinear form $\bar a$ is both coercive and continuous, i.e. there exist two constants $\alpha,\gamma>0$, independent of the nodal distance $h$, such that
+\begin{equation}\label{nitsche_stability}
+	\bar a(w, w)\ge\alpha\Vert w \Vert_{H_2}^2,\quad \forall w\in H_2
+\end{equation}
+\begin{equation}\label{nitsche_continuity}
+	\left|\bar a(\delta w, w)\right|\le\gamma\Vert \delta w \Vert_{H_2}\Vert w \Vert_{H_2},\quad \forall \delta w, w\in H_2
 \end{equation}
 
 However, the combination of Gauss quadrature rule and Nitsche method has its problem.

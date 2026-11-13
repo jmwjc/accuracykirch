@@ -4,12 +4,12 @@ This appendix presents the Aubin--Nitsche trick method for the $H_2$--elliptic v
 This Aubin--Nitsche trick will be used to establish the relationship among the $H_2$-error, $H_1$-error and $L_2$-error in Kirchhoff plate formulation.
 
 \subsection{$L_2$-error estimator}
-Suppose that the following second order problem is introduced herein as the duality problem of Nitsche trick.
+Suppose that the following fourth order problem is introduced herein as the duality problem of Nitsche trick.
 \begin{equation}
 	a(v,u) = (v,e), \quad \forall v \in H_2
 \end{equation}
 while $\Delta^2 u = e$ in $\Omega$, and $e = w-w_h \in H_2$.
-According to closed graph theorem, we have:
+According to the elliptic regularity theory, we have:
 \begin{equation}
 	\vert u \vert_{H_k} \le C \Vert e \Vert_{L_2}, \quad \forall k \le 4
 \end{equation}
@@ -17,7 +17,7 @@ According to closed graph theorem, we have:
 \begin{equation}
 	\begin{aligned}
 		\Vert e \Vert_{L_2}^2 &= (e,e)_{L_2} = a(e,u) & \\
-		&= a(e,u - \mathcal I^p u) & (\textrm{Orthogonality of \eqref{orthogonality_std}}) \\
+		&= a(e,u - \mathcal I^p u) & (\textrm{Orthogonality of Eq. \eqref{orthogonality}}) \\
 		&\le C \Vert e \Vert_{H_2} \Vert u - \mathcal I^p u \Vert_{H_2} & (\textrm{Continuousity of \eqref{continuity}})
 	\end{aligned}
 \end{equation}
