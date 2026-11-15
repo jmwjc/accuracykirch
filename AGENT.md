@@ -51,6 +51,7 @@ Continuity follows from the Cauchy--Schwarz inequality. Coercivity follows from 
 - 角点集写 `c_P`；角点在文字中称 `corners of boundary curve $\Gamma^{c}$`。
 - 带上划线的符号表示给定值或材料常数（`\bar w`、`\bar V`、`\bar D`），带括号的函数名表示由 $w$ 导出的量（`\theta_n(w)`、`V(w)`、`M_n(w)`、`P(w)`）。
 - **不改写作者已有句式和用词**，只做点对点替换；发现疑似笔误先提出，不擅自纠正（例如目前保留 `Possion` 写法）。
+- **不得删除作者新增的公式、段落或文件内容**：只做记号统一、错字修正与必要的上下文补写；确需改动时先提出，由作者决定。
 
 ## 编译（唯一事实来源：Helix 的 texlab 配置）
 
