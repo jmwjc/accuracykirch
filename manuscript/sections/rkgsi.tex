@@ -1,124 +1,144 @@
 % !TEX root = ../main.tex
 \section{Variationally--consistent reproducing kernel gradient smoothing meshfree formulation}\label{sec:rkgs}
 
-The error estimates established in Section \ref{sec:error} reveal that the optimal convergence of the Galerkin meshfree formulation is attained only when the variational consistency of order $q=p$ is fulfilled, i.e. the quadrature has to be exact for the polynomial test functions of degree up to $p$.
-This requirement can hardly be met by the conventional Gauss integration, since the RK shape functions are rational and their supports are misaligned with the integration cells.
-The reproducing kernel gradient smoothing integration (RKGSI) \cite{ref43} is therefore adopted, which fulfills the integration constraint by construction rather than by increasing the number of quadrature points.
-Meanwhile, in order to impose the essential boundary conditions in a variationally consistent manner and to circumvent the artificial parameters of the Nitsche method, the RKGSI is combined with the Hellinger--Reissner variational principle \cite{ref52}.
-
-\subsection{Hellinger--Reissner weak form}\label{sec:hr}
-
-In the mixed formulation the bending moment $M_{ij}$ is treated as an independent field.
-The moment--curvature relation is expressed by the compliance tensor $C_{ijkl}$, which is the inverse of the elasticity tensor
-\begin{equation}\label{elasticity_tensor}
-	D_{ijkl}=\bar D\left[\nu\delta_{ij}\delta_{kl}+\frac{1-\nu}{2}\left(\delta_{ik}\delta_{jl}+\delta_{il}\delta_{jk}\right)\right]
+Section 3 states that the variational consistency plays a key role for the accuracy of Galerkin meshfree methods.
+The conventional Gauss integration, however, can only fulfil the variational consistency of order $q=1$ and is therefore not able to verify the error estimates presented in Section \ref{sec:error}.
+In this section the reproducing kernel gradient smoothing integration (RKGSI) \cite{} based on the Hellinger--Reissner variational principle \cite{} is adopted as the variationally consistent integration scheme, in which the bending moment $\boldsymbol M$ is treated as an independent field.
+The corresponding boundary value problem reads
+\begin{equation}\label{hr_strong}
+	\begin{cases}
+		M_{ij,ij}+\bar q=0 & \text{in}\;\Omega\\
+		V(\boldsymbol M)=M_{ni,i}+M_{ns,s}=\bar V & \text{on}\;\Gamma_{V}\\
+		M(\boldsymbol M)=M_{nn}=\bar M & \text{on}\;\Gamma_{M}\\
+		P(\boldsymbol M)=-\left[M_{ns}\right]=\bar P & \text{at}\;c_P\\
+		w=\bar w & \text{on}\;\Gamma_{w}\\
+		\theta(w)=w_{,n}=\bar\theta & \text{on}\;\Gamma_{\theta}\\
+		w=\bar w & \text{at}\;c_w
+	\end{cases}
 \end{equation}
-such that $C_{ijkl}D_{klmn}=\frac{1}{2}\left(\delta_{im}\delta_{jn}+\delta_{in}\delta_{jm}\right)$.
-The boundary quantities associated with the moment field are defined as
-\begin{equation}\label{moment_boundary}
-	M_n(M)=M_{ij}n_i n_j,\quad M_{ns}(M)=M_{ij}n_i s_j,\quad V(M)=M_{ij,j}n_i+M_{ns,s}(M),\quad P(M)=\left[M_{ns}(M)\right]
-\end{equation}
-with $\left[\cdot\right]$ being the jump at the corner points defined in Eq. \eqref{jump}.
+
 The Hellinger--Reissner functional of the Kirchhoff plate then reads
 \begin{equation}\label{hr_functional}
 	\begin{aligned}
-		\Pi(M_{ij},w)={}&\int_\Omega \frac{1}{2} M_{ij} C_{ijkl} M_{kl} d\Omega
-		-\int_{\Gamma_{w}} V(M) w d\Gamma
-		+\int_{\Gamma_{\theta}} M_n(M)\theta_n(w) d\Gamma
-		-P(M)w\vert_{\boldsymbol x\in c_w} \\
+		\Pi(\boldsymbol M,w)={}&\int_\Omega \frac{1}{2} M_{ij} C^{-1}_{ijkl} M_{kl} d\Omega
+		-\int_{\Gamma_{w}} V(\boldsymbol M) \bar w d\Gamma
+		+\int_{\Gamma_{\theta}} M(\boldsymbol M) \bar\theta d\Gamma
+		-P(\boldsymbol M)\bar w\vert_{\boldsymbol x\in c_w} \\
 		&+\int_\Omega w\left(M_{ij,ij}+\bar q\right)d\Omega
-		+\int_{\Gamma_{M}} \theta_n(w)\left(M_n(M)-\bar M_n\right)d\Gamma \\
-		&-\int_{\Gamma_{V}} w\left(V(M)-\bar V\right)d\Gamma
-		-w\left(P(M)-\bar P_c\right)\vert_{\boldsymbol x\in c_P}
+		+\int_{\Gamma_{M}} \theta(w)\left(M(\boldsymbol M)-\bar M\right)d\Gamma \\
+		&-\int_{\Gamma_{V}} w\left(V(\boldsymbol M)-\bar V\right)d\Gamma
+		-w\left(P(\boldsymbol M)-\bar P\right)\vert_{\boldsymbol x\in c_P}
 	\end{aligned}
 \end{equation}
-The stationarity of Eq. \eqref{hr_functional} with respect to $M_{ij}$ yields the moment--curvature relation in the weak sense, while the stationarity with respect to $w$ yields the equilibrium equation together with the natural boundary conditions.
-It is noted that the essential boundary conditions $w=\bar w$ and $\theta_n(w)=\bar\theta_n$ enter Eq. \eqref{hr_functional} as the natural conditions of the mixed formulation, so that they are accommodated without introducing any stabilization parameter.
-
-\subsection{Second order reproducing kernel gradient smoothing}\label{sec:smoothed}
-
-The bending moment is approximated in each integration cell $\Omega_C$ by a polynomial of degree $p-2$
-\begin{equation}\label{moment_approx}
-	M^h_{ij}(\boldsymbol x)=\boldsymbol a_{ij}^{T}\boldsymbol q(\boldsymbol x),\qquad
-	\boldsymbol q(\boldsymbol x)=\left\{1,\ x,\ y,\ \cdots,\ x^{m}y^{n},\ \cdots\right\}^{T},\quad 0\le m+n\le p-2
+where $C^{-1}_{ijkl}$ is the inverse of the elasticity tensor $C_{ijkl}$ given in Eq. \eqref{curvature}, i.e.
+\begin{equation}\label{compliance}
+	C_{ijkl}C^{-1}_{klmn}=\frac{1}{2}\left(\delta_{im}\delta_{jn}+\delta_{in}\delta_{jm}\right)
 \end{equation}
-where the constant coefficient vector $\boldsymbol a_{ij}$ is determined by the $L_2$ projection of the moment--curvature relation within the cell, i.e.
-\begin{equation}\label{moment_coef}
-	\boldsymbol a_{ij}=-D_{ijkl}\boldsymbol G^{-1}\left(\sum_{I=1}^{n_p}\left(\tilde{\boldsymbol g}_{klI}-\boldsymbol g_{klI}\right)d_I+\hat{\boldsymbol g}_{kl}\right),\qquad
-	\boldsymbol G=\int_{\Omega_C}\boldsymbol q\boldsymbol q^{T}d\Omega
-\end{equation}
-in which the vectors $\tilde{\boldsymbol g}_{ijI}$, $\boldsymbol g_{ijI}$ and $\hat{\boldsymbol g}_{ij}$ collect the boundary and cell contributions obtained by the integration by parts
-\begin{equation}\label{g_tilde}
+Taking the variation of Eq. \eqref{hr_functional} with respect to both $\boldsymbol M$ and $w$, and requiring $\delta\Pi=0$ for arbitrary $\delta\boldsymbol M$ and $\delta w$, yields
+\begin{equation}\label{hr_variation_M}
 	\begin{aligned}
-		\tilde{\boldsymbol g}_{ijI}={}&\int_{\partial\Omega_C}\Psi_{I,n}\boldsymbol q n_i n_j d\Gamma
-		-\int_{\partial\Omega_C}\Psi_I\left(n_i\boldsymbol q_{,j}+\boldsymbol q_{,k}s_i n_j s_k\right)d\Gamma
-		+\left[\Psi_I\boldsymbol q n_i s_j\right]_{\boldsymbol x\in c_C}
-		+\int_{\Omega_C}\Psi_I\boldsymbol q_{,ij}d\Omega
+		&\int_\Omega \delta M_{ij} C^{-1}_{ijkl} M_{kl} d\Omega
+		+\int_\Omega w\,\delta M_{ij,ij}d\Omega
+		-\int_{\Gamma_{w}}V(\delta\boldsymbol M)\bar w d\Gamma
+		+\int_{\Gamma_{\theta}}M(\delta\boldsymbol M)\bar\theta d\Gamma
+		-P(\delta\boldsymbol M)\bar w\vert_{\boldsymbol x\in c_w} \\
+		&\qquad+\int_{\Gamma_{M}}\theta(w)M(\delta\boldsymbol M)d\Gamma
+		-\int_{\Gamma_{V}}w V(\delta\boldsymbol M)d\Gamma
+		-w P(\delta\boldsymbol M)\vert_{\boldsymbol x\in c_P}=0
 	\end{aligned}
 \end{equation}
-where $c_C$ denotes the corner points of $\partial\Omega_C$, and $n_i$ and $s_i$ are the outward normal and tangent of $\partial\Omega_C$.
-The vector $\boldsymbol g_{ijI}$ takes the same form as Eq. \eqref{g_tilde} except that the boundary integrals are restricted to the essential boundaries $\Gamma_{w}$ and $\Gamma_{\theta}$, while $\hat{\boldsymbol g}_{ij}$ contains the prescribed boundary values $\bar w$ and $\bar\theta_n$.
+\begin{equation}\label{hr_variation_w}
+	\begin{aligned}
+		&\int_\Omega \delta w\left(M_{ij,ij}+\bar q\right)d\Omega
+		+\int_{\Gamma_{M}}\theta(\delta w)\left(M(\boldsymbol M)-\bar M\right)d\Gamma
+		-\int_{\Gamma_{V}}\delta w\left(V(\boldsymbol M)-\bar V\right)d\Gamma \\
+		&\qquad-\delta w\left(P(\boldsymbol M)-\bar P\right)\vert_{\boldsymbol x\in c_P}=0
+	\end{aligned}
+\end{equation}
+It is noted that the natural boundary conditions in Eq. \eqref{hr_strong} are now enforced in the sense of the Lagrange multiplier method, with the deflection $w$ acting as the multiplier.
+On the other hand, the essential boundary conditions $w=\bar w$ and $\theta(w)=\bar\theta$ enter Eq. \eqref{hr_functional} as the natural conditions of the mixed formulation, so that they are accommodated without introducing any stabilization parameter.
+
+In the context of the HR-based RKGSI framework, the problem domain is partitioned into a set of integration cells $\Omega_C$, i.e. $\Omega=\bigcup_{C=1}^{n_e}\Omega_C$, where $n_e$ denotes the total number of integration cells.
+The bending moment is approximated in each integration cell $\Omega_C$ by a polynomial of degree $q-2$
+\begin{equation}\label{moment_approx}
+	M^h_{ij}(\boldsymbol x)=\boldsymbol a_{ij}^{T}\boldsymbol p^{[q-2]}(\boldsymbol x)
+\end{equation}
+where the constant coefficient vector $\boldsymbol a_{ij}$ is determined by Eq. \eqref{hr_variation_M}:
+\begin{equation}\label{moment_coef}
+	\boldsymbol a_{ij}=-C_{ijkl}\boldsymbol G^{-1}\left(\sum_{I=1}^{n_p}\left(\tilde{\boldsymbol g}_{klI}-\bar{\boldsymbol g}_{klI}\right)d_I+\hat{\boldsymbol g}_{kl}\right),\qquad
+	\boldsymbol G=\int_{\Omega_C}\boldsymbol p^{[q-2]}\boldsymbol p^{[q-2]T}d\Omega
+\end{equation}
+with
+\begin{equation}\label{g_ij}
+	\left\{
+	\begin{aligned}
+		\tilde{\boldsymbol g}_{ijI}&=\int_{\Gamma_C}\Psi_{I,n}\boldsymbol p^{[q-2]} n_i n_j d\Gamma
+		-\int_{\Gamma_C}\Psi_I\left(n_i\boldsymbol p^{[q-2]}_{,j}+\boldsymbol p^{[q-2]}_{,k}s_i n_j s_k\right)d\Gamma
+		+\left[\Psi_I\boldsymbol p^{[q-2]} n_i s_j\right]_{\boldsymbol x\in c_C}
+		+\int_{\Omega_C}\Psi_I\boldsymbol p^{[q-2]}_{,ij}d\Omega \\
+		\bar{\boldsymbol g}_{ijI}&=\int_{\Gamma_C\cap\Gamma_{\theta}}\Psi_{I,n}\boldsymbol p^{[q-2]} n_i n_j d\Gamma
+		-\int_{\Gamma_C\cap\Gamma_{w}}\Psi_I\left(n_i\boldsymbol p^{[q-2]}_{,j}+\boldsymbol p^{[q-2]}_{,k}s_i n_j s_k\right)d\Gamma
+		+\left[\Psi_I\boldsymbol p^{[q-2]} n_i s_j\right]_{\boldsymbol x\in c_C\cap c_w} \\
+		\hat{\boldsymbol g}_{ij}&=\int_{\Gamma_C\cap\Gamma_{\theta}}\boldsymbol p^{[q-2]} n_i n_j \bar\theta d\Gamma
+		-\int_{\Gamma_C\cap\Gamma_{w}}\left(n_i\boldsymbol p^{[q-2]}_{,j}+\boldsymbol p^{[q-2]}_{,k}s_i n_j s_k\right)\bar w d\Gamma
+		+\bar w\left[\boldsymbol p^{[q-2]} n_i s_j\right]_{\boldsymbol x\in c_C\cap c_w}
+	\end{aligned}
+	\right.
+\end{equation}
 Substituting Eq. \eqref{moment_coef} into Eq. \eqref{moment_approx} gives
 \begin{equation}\label{moment_discrete}
-	M^h_{ij}(\boldsymbol x)=-D_{ijkl}\left(\sum_{I=1}^{n_p}\tilde\Psi_{I,kl}(\boldsymbol x)d_I-\sum_{I=1}^{n_p}\Psi_{I,kl}(\boldsymbol x)d_I\right)+\boldsymbol q^{T}\boldsymbol G^{-1}\hat{\boldsymbol g}_{ij}
+	\boldsymbol M^h = \tilde{\boldsymbol M}^h - \bar{\boldsymbol M}^h + \hat{\boldsymbol M}^h = \boldsymbol C:(\tilde{\boldsymbol \kappa}^h - \bar{\boldsymbol \kappa}^h + \hat{\boldsymbol \kappa}^h)
 \end{equation}
-with the second order smoothed gradients
+where
+\begin{equation}\label{kappa_decomposition}
+	\begin{aligned}
+		\tilde\kappa^h_{ij}&=-\sum_{I=1}^{n_p}\tilde\Psi_{I,ij} d_I,&\qquad
+		\bar\kappa^h_{ij}&=-\sum_{I=1}^{n_p}\bar \Psi_{I,ij} d_I,&\qquad
+		\hat\kappa^h_{ij}&=-\boldsymbol p^{[q-2]T}\boldsymbol G^{-1}\hat{\boldsymbol g}_{ij}
+	\end{aligned}
+\end{equation}
+with
 \begin{equation}\label{smoothed_gradient}
-	\tilde\Psi_{I,ij}(\boldsymbol x)=\boldsymbol q^{T}\boldsymbol G^{-1}\tilde{\boldsymbol g}_{ijI},\qquad
-	\Psi_{I,ij}(\boldsymbol x)=\boldsymbol q^{T}\boldsymbol G^{-1}\boldsymbol g_{ijI}
+	\tilde\Psi_{I,ij}(\boldsymbol x)=\boldsymbol p^{[q-2]T}\boldsymbol G^{-1}\tilde{\boldsymbol g}_{ijI},\qquad
+	\bar \Psi_{I,ij}(\boldsymbol x)=\boldsymbol p^{[q-2]T}\boldsymbol G^{-1}\bar{\boldsymbol g}_{ijI}
 \end{equation}
-By the definition of $\boldsymbol G$ and $\tilde{\boldsymbol g}_{ijI}$, the smoothed gradient satisfies the following cell-wise identity
-\begin{equation}\label{smoothing_identity}
-	\int_{\Omega_C}^{*}\tilde\Psi_{I,ij}\boldsymbol q d\Omega=\boldsymbol q^{T}\boldsymbol G^{-1}\int_{\Omega_C}\boldsymbol q\boldsymbol q^{T}d\Omega=\tilde{\boldsymbol g}_{ijI}
+With the curvature components in Eq. \eqref{kappa_decomposition}, the bending moment is finally expressed in terms of the nodal coefficients $d_I$ of the deflection.
+The smoothed gradients satisfy the following consistency condition \cite{} within each integration cell $\Omega_C$
+\begin{equation}\label{consistency_hr}:
+	\begin{aligned}
+		\sum_{I=1}^{n_p}\tilde\Psi_{I,ij}(\boldsymbol x)\boldsymbol p^{[q-2]}(\boldsymbol x_I)=\boldsymbol p^{[q-2]}_{,ij}(\boldsymbol x)
+	\end{aligned}
 \end{equation}
-for any polynomial $\boldsymbol q$ of degree up to $p-2$, where $\int^*$ denotes the quadrature associated with the RKGSI.
-Eq. \eqref{smoothing_identity} is the reason why the integration constraint is embedded in the smoothed gradient, since the second derivatives of the shape function are replaced by a cell-wise polynomial whose moment against $\boldsymbol q$ is reproduced exactly.
+Substituting Eqs. \eqref{moment_discrete} and \eqref{kappa_decomposition} into the weak form \eqref{hr_variation_w} then leads to the following variational problem of the RKGSI.
 
-\subsection{Discrete formulation}\label{sec:discrete_hr}
-
-Substituting Eqs. \eqref{moment_discrete} and \eqref{smoothed_gradient} into the stationary condition of Eq. \eqref{hr_functional} leads to the discrete equilibrium equations
-\begin{equation}\label{hr_discrete}
-	\left(\bar{\boldsymbol K}+\tilde{\boldsymbol K}+\hat{\boldsymbol K}\right)\boldsymbol d=\bar{\boldsymbol f}+\tilde{\boldsymbol f}+\hat{\boldsymbol f}
+\begin{equation}\label{variation_rk}
+	\text{Find}\; w^h \in W^h:\quad\tilde a(\delta w^h, w^h) = \tilde f(\delta w^h) ,\quad \forall \delta w \in W^h
 \end{equation}
-in which the stiffness matrix associated with the smoothed gradients is
-\begin{equation}\label{hr_K}
-	\bar K_{IJ}=\int_\Omega \tilde\Psi_{I,ij}D_{ijkl}\tilde\Psi_{J,kl}d\Omega
+\begin{equation}\label{variation_rk_a}
+	\begin{aligned}
+		\tilde a(\delta w^h,\delta w^h) &= \int_\Omega \delta\tilde{\boldsymbol\kappa}^h : \boldsymbol C : \tilde{\boldsymbol\kappa}^h d\Omega
+		- \int_{\Gamma_{w}} \left( V(\delta\bar{\boldsymbol M}^h) w^h + V(\bar{\boldsymbol M}^h) \delta w^h \right) d\Gamma \\
+		&+ \int_{\Gamma_{\theta}} \left( M(\delta\bar{\boldsymbol M}^h) \theta(w^h) + M(\bar{\boldsymbol M}^h) \theta(\delta w^h) \right) d\Gamma 
+		- \left( P(\delta\bar{\boldsymbol M}^h) w^h + P(\bar{\boldsymbol M}^h) \delta w^h \right) \vert_{\boldsymbol x \in c_w} \\
+		&+ \int_{\Gamma_{w}} V(\delta\hat{\boldsymbol M}^h) w^h d\Gamma 
+		- \int_{\Gamma_{\theta}} M(\delta\hat{\boldsymbol M}^h) \theta(w^h) d\Gamma 
+		+ P(\delta\hat{\boldsymbol M}^h) w^h \vert_{\boldsymbol x \in c_w} \\
+	\end{aligned}
 \end{equation}
-and the matrices $\tilde{\boldsymbol K}$ and $\hat{\boldsymbol K}$ together with the corresponding force vectors arise from the boundary terms of Eq. \eqref{hr_functional} on $\Gamma_{w}$, $\Gamma_{\theta}$ and $c_w$.
-Specifically, $\tilde{\boldsymbol K}$ and $\tilde{\boldsymbol f}$ are the consistent terms which guarantee the variational consistency of the formulation, while $\hat{\boldsymbol K}$ and $\hat{\boldsymbol f}$ are the stabilized terms which recover the coercivity of the stiffness matrix.
-Compared with the Nitsche formulation of Section \ref{sec:gauss}, the consistent terms are derived from the variational principle rather than added artificially, and the stabilized terms contain no empirical parameters, so that the parameter sensitivity of the Nitsche method is eliminated.
-
-\subsection{Variational consistency}\label{sec:vc}
-
-The variationally consistent property of the above formulation is stated as follows.
-
-\emph{Proposition.} Provided that the integration cells are aligned with the supports of the shape functions in the sense of Eq. \eqref{smoothing_identity}, the discrete formulation \eqref{hr_discrete} fulfills the variational consistency of order $p$, i.e.
-\begin{equation}\label{hr_vc}
-	a^{*}(\delta w^h, v)=b^{*}(\delta w^h, v),\qquad \forall \delta w^h\in W^h,\ v\in P^{p}
+with
+\begin{equation}\label{variation_rk_f}
+	\begin{aligned}
+		\tilde f(\delta w) &= f(\delta w^h)  
+		- \int_{\Gamma_{w}} V(\delta\tilde{\boldsymbol M}^h) \bar w d\Gamma 
+		+ \int_{\Gamma_{\theta}} M(\delta\tilde{\boldsymbol M}^h) \bar \theta d\Gamma 
+		- P(\delta\tilde{\boldsymbol M}^h) \bar w \vert_{\boldsymbol x \in c_w} \\
+		&+ \int_{\Gamma_{w}} V(\delta\hat{\boldsymbol M}^h) \bar w d\Gamma 
+		- \int_{\Gamma_{\theta}} M(\delta\hat{\boldsymbol M}^h) \bar \theta d\Gamma 
+		+ P(\delta\hat{\boldsymbol M}^h) \bar w \vert_{\boldsymbol x \in c_w} \\
+	\end{aligned}
 \end{equation}
 
-The proof follows directly from Eq. \eqref{smoothing_identity}.
-For a polynomial $v\in P^{p}$, the moment field associated with $v$ is a polynomial of degree $p-2$ and thus lies in the space spanned by $\boldsymbol q$.
-Consequently the cell-wise quadrature of the smoothed gradient is exact in the sense of Eq. \eqref{smoothing_identity}, and the boundary terms of Eq. \eqref{g_tilde} reproduce the corresponding boundary integrals of $v$ exactly.
-Therefore the discrete equations \eqref{hr_discrete} coincide with the exact weak form for any polynomial test function of degree up to $p$, which is precisely the variational consistency of order $q=p$ required by the error estimates in Section \ref{sec:error}.
+It can be found from Eqs. \eqref{variation_rk}--\eqref{variation_rk_f} that the rearranged variational problem of the RKGSI takes a similar form to the Nitsche-based Galerkin meshfree formulation \cite{} in Eq. \eqref{nitsche_weakform}, in the sense that both consist of a consistent term and a stabilized term.
+Compared with the Nitsche method, the consistent term recovers the $q$-th order variational consistency owing to the cell-wise polynomial approximation of the bending moment, and the resulting orthogonality estimate is given by Eq. \eqref{orthogonality_estimate}.
+On the other hand, the stabilized term no longer relies on the penalty method, so that the coercivity of $\tilde a$ is guaranteed without any artificial parameter.
 
-A direct consequence of Eq. \eqref{hr_vc} is that the polynomial orthogonality condition \eqref{poly_orthogonality} holds exactly for the present formulation, so that the error estimates \eqref{h2_estimate_pq}, \eqref{l2_p2_abs}--\eqref{l2_p3_abs} and \eqref{h1_gain} with $q=p$ apply without any modification.
-The theoretical convergence rates are collected in Table \ref{tab:rates}, in which the Gauss integration (GI) with $q=1$ is also included for comparison.
-The variational consistency of the formulation is further verified numerically in Section \ref{sec:numerical}.
-
-\begin{table}[pos=htbp]
-\centering
-\caption{Convergence rates of the $H_2$, $H_1$ and $L_2$ errors of the Galerkin meshfree formulation with GI and RKGSI.}\label{tab:rates}
-\begin{tabular}{@{}lccc@{}}
-\toprule
-\multirow{2}{*}{Error norm} & \multirow{2}{*}{Order} & \multicolumn{2}{c}{Integration scheme}\\
-\cmidrule(lr){3-4}
-& & GI ($q=1$) & RKGSI ($q=p$)\\
-\midrule
-$H_2$ error & $p\ge2$ & $0$ & $p-1$\\
-$H_1$ error & $p\ge2$ & $1$ & $p$\\
-$L_2$ error & $p=2$ & $2$ & $p$\\
-            & $p\ge3$ & $2$ & $p+1$\\
-\bottomrule
-\end{tabular}
-\end{table}

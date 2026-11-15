@@ -8,11 +8,11 @@ In accordance with the Kirchhoff--Love plate theory \cite{}, the equilibrium equ
 	\begin{cases}
 		\bar D w_{,iijj}=\bar q & \text{in}\;\Omega\\
 		w=\bar{w} & \text{on}\;\Gamma_{w}\\
-		\theta_n(w)=w_{,n}=\bar{\theta}_{n} & \text{on}\;\Gamma_{\theta}\\
+		\theta(w)=w_{,n}=\bar{\theta} & \text{on}\;\Gamma_{\theta}\\
 		w=\bar{w} & \text{at}\;c_w\\
 		V(w)=-\bar D\left(w_{,iin} +(1-\nu)\left(w_{,ns}\right)_{,s}\right)=\bar{V} & \text{on}\;\Gamma_{V}\\
 		M(w)=-\bar D\left(w_{,nn}+\nu w_{,ss}\right)=\bar{M} & \text{on}\;\Gamma_{M}\\
-		P(w)=-\bar D(1-\nu)\left[w_{,ns}\right]=\bar{P} & \text{at}\;c_P
+		P(w)=\bar D(1-\nu)\left[w_{,ns}\right]=\bar{P} & \text{at}\;c_P
 	\end{cases}
 \end{equation}
 where the subscript comma of $w_{,i}$ denotes the partial derivative of $w$ with respect to the $i$-th spatial coordinate, $i=1,2$. $\bar D$ denotes the bending rigidity and it can be expressed by Young's modulus $E$, Poisson ratio $\nu$ and plate thickness $t$ as:
@@ -20,15 +20,10 @@ where the subscript comma of $w_{,i}$ denotes the partial derivative of $w$ with
 	\bar D=\frac{Et^{3}}{12(1-\nu^{2})}
 \end{equation}
 and $\bar q$ the distributed transverse load on the plate.
-$\Gamma_{w}$ and $\Gamma_{\theta}$ denote the displacement and slope boundaries, $\bar{w}$ and $\bar{\theta}_{n}$ are the corresponding given values.
+$\Gamma_{w}$ and $\Gamma_{\theta}$ denote the displacement and slope boundaries, $\bar{w}$ and $\bar{\theta}$ are the corresponding given values.
 $\boldsymbol{n}=\{n_i\}$ and $\boldsymbol{s}=\{s_i\}$ represent the boundary outward normal and tangent.
-$\bar{V}$ and $\bar{M}_{n}$ denote the prescribed equivalent shear force and normal bending moment on the natural boundaries $\Gamma_{V}$ and $\Gamma_{M}$, respectively.
-$c_w$ collects the corner points on $\Gamma_{w}$, and $c_P$ collects the corner points where the concentrated corner force $\bar{P}_{c}$ is prescribed.
-Since each corner point is shared by two adjacent boundary segments, the jump of a quantity $f$ across a corner point $\boldsymbol x\in c$ is defined as:
-\begin{equation}\label{jump}
-	[f(\boldsymbol x)]=f(\boldsymbol x^{+})-f(\boldsymbol x^{-})
-\end{equation}
-where $\boldsymbol x^{+}$ and $\boldsymbol x^{-}$ denote the two sides of the corner point $\boldsymbol x$ along the boundary $\Gamma$.
+$\bar{V}$ and $\bar{M}$ denote the prescribed equivalent shear force and normal bending moment on the natural boundaries $\Gamma_{V}$ and $\Gamma_{M}$, respectively.
+$c_w$ collects the corner points on $\Gamma_{w}$, and $c_P$ collects the corner points where the concentrated corner force $\bar{P}$ is prescribed.
 The above boundary segments cover the whole boundary and the corner points of $\Gamma$, denoted by $c$, are shared by them, i.e.
 \begin{equation}\label{boundary_relations}
 	\Gamma_{w}\cup\Gamma_{V}=\Gamma_{\theta}\cup\Gamma_{M}=\Gamma,\qquad c_w\cup c_P=c
@@ -36,16 +31,16 @@ The above boundary segments cover the whole boundary and the corner points of $\
 
 With the above boundary conditions, the total potential energy functional of the Kirchhoff plate can be expressed as:
 \begin{equation}\label{energy_functional}
-	\Pi(w) = \int_\Omega \frac{1}{2} \boldsymbol \kappa^T \boldsymbol D \boldsymbol \kappa d\Omega
+	\Pi(w) = \int_\Omega \frac{1}{2} \boldsymbol \kappa : \boldsymbol C : \boldsymbol \kappa d\Omega
 	- \int_{\Gamma_{V}} w \bar V d\Gamma
-	+ \int_{\Gamma_{M}} \theta_n \bar M_n d\Gamma
-	- w \bar P_c\vert_{\boldsymbol x \in c_P}
+	+ \int_{\Gamma_{M}} \theta(w) \bar M d\Gamma
+	- w \bar P\vert_{\boldsymbol x \in c_P}
 	- \int_\Omega w \bar q d\Omega
 \end{equation}
-where $\boldsymbol \kappa$ denotes the curvature vector and $\boldsymbol D$ the elasticity matrix of the plate in Voigt notation, which are expressed by the deflection $w$ as:
+where $\boldsymbol \kappa$ denotes the curvature tensor and $\boldsymbol C$ the elasticity tensor of the plate, their components are expressed as:
 \begin{equation}\label{curvature}
-	\boldsymbol \kappa=-\left\{w_{,xx},\ w_{,yy},\ 2w_{,xy}\right\}^{T},\quad
-	\boldsymbol D=\bar D\begin{pmatrix}1 & \nu & 0\\ \nu & 1 & 0\\ 0 & 0 & \frac{1-\nu}{2}\end{pmatrix}
+	\kappa_{ij} =- w_{,ij},\quad
+	C_{ijkl}=\bar D\left(\nu \delta_{ij} \delta_{kl} + \frac{1-\nu}{2}\left(\delta_{ik}\delta_{jl} + \delta_{il}\delta_{jk}\right)\right)
 \end{equation}
 Using a standard variation operator, i.e. $\delta \Pi (w) = 0$, Eq. \eqref{energy_functional} turns into the variational problem:
 \begin{equation}\label{weakform}
@@ -53,13 +48,13 @@ Using a standard variation operator, i.e. $\delta \Pi (w) = 0$, Eq. \eqref{energ
 \end{equation}
 with
 \begin{equation}\label{bilinear}
-	a(\delta w, w) = \int_\Omega \delta \boldsymbol \kappa^T \boldsymbol D \boldsymbol \kappa d\Omega
+	a(\delta w, w) = \int_\Omega \delta \boldsymbol \kappa : \boldsymbol C : \boldsymbol \kappa d\Omega
 \end{equation}
 \begin{equation}\label{linear}
 	f(\delta w) =
 	\int_{\Gamma_{V}} \delta w \bar V d\Gamma
-	- \int_{\Gamma_{M}} \theta_n(\delta w) \bar M_n d\Gamma
-	+ \delta w \bar P_c\vert_{\boldsymbol x \in c_P}
+	- \int_{\Gamma_{M}} \theta(\delta w) \bar M d\Gamma
+	+ \delta w \bar P\vert_{\boldsymbol x \in c_P}
 	+ \int_\Omega \delta w \bar q d\Omega
 \end{equation}
 The above variational problem is well posed provided that the bilinear form $a(\cdot,\cdot)$ is continuous and coercive \cite{}, i.e. there exist two constants $\gamma,\alpha>0$, independent of the nodal distance $h$, such that
@@ -107,6 +102,10 @@ with $r=|\boldsymbol x_I-\boldsymbol x|/s$ being the relative distance between t
 
 The unknown vector $\boldsymbol c(\boldsymbol x)$ in Eq. \eqref{shape} is determined by the following $p$-th order consistency conditions:
 \begin{equation}\label{consistency}
+	\sum_{I=1}^{n_p}\Psi_I(\boldsymbol x) \boldsymbol p^{[p]}(\boldsymbol x_I)=\boldsymbol p^{[p]}(\boldsymbol x)
+\end{equation}
+or equivalently with a shift form: 
+\begin{equation}\label{consistency_shift}
 	\sum_{I=1}^{n_p}\Psi_I(\boldsymbol x) \boldsymbol p^{[p]}(\boldsymbol x_I-\boldsymbol x)=\boldsymbol p^{[p]}(\boldsymbol 0)
 \end{equation}
 Substituting Eq. \eqref{shape} into Eq. \eqref{consistency}, $\boldsymbol c(\boldsymbol x)$ takes the following form:
@@ -146,19 +145,19 @@ where $b$ is an identical functional with $f$ except that the external forces in
 \begin{equation}\label{functional_b}
 	b(\delta w, v) =
 	\int_{\Gamma_{V}} \delta w V(v) d\Gamma
-	- \int_{\Gamma_{M}} \theta_n(\delta w) M_n(v) d\Gamma
+	- \int_{\Gamma_{M}} \theta(\delta w) M(v) d\Gamma
 	+ \delta w P(v)\vert_{\boldsymbol x \in c_P}
 	+ \int_\Omega \delta w v_{,iijj} d\Omega
 \end{equation}
 
 It is noted that the variational consistency of a numerical method is governed by two issues, namely the consistency of the numerical integration and the way in which the essential boundary conditions are imposed.
 Most of traditional numerical approximations \cite{}, like finite element methods, have the Kronecker delta property, i.e. $\Psi_I(\boldsymbol x_J) = \delta_{IJ}$.
-For these schemes, the essential boundary conditions can be imposed directly, i.e. $\delta w^h=0$ as $\boldsymbol x \in \Gamma_w$ and $\theta_n(\delta w^h)=0$ as $\boldsymbol x \in \Gamma_{\theta}$, such that Eq. \eqref{variational_consistency} holds for an arbitrary order $q$.
+For these schemes, the essential boundary conditions can be imposed directly, i.e. $\delta w^h=0$ as $\boldsymbol x \in \Gamma_w$ and $\theta(\delta w^h)=0$ as $\boldsymbol x \in \Gamma_{\theta}$, such that Eq. \eqref{variational_consistency} holds for an arbitrary order $q$.
 Thereby the boundary integrals in Eq. \eqref{functional_b} can be extended from $\Gamma_{V}$ and $\Gamma_{M}$ to the whole boundary $\Gamma$, and Eq. \eqref{functional_b} can be simplified as:
 \begin{equation}\label{functional_b_fem}
 	b(\delta w^h, v) =
 	\int_{\Gamma} \delta w^h V(v) d\Gamma
-	- \int_{\Gamma} \theta_n(\delta w^h) M_n(v) d\Gamma
+	- \int_{\Gamma} \theta(\delta w^h) M(v) d\Gamma
 	+ \delta w^h P(v)\vert_{\boldsymbol x \in c_P}
 	+ \int_\Omega \delta w^h v_{,iijj} d\Omega
 \end{equation}
@@ -181,8 +180,8 @@ One of the most frequently-used methods is the Nitsche method \cite{}.
 The Nitsche method adds consistent terms and stabilized terms in energy functional:
 \begin{equation}\label{nitsche_functional}
 	\begin{aligned}
-		\bar \Pi(w) = \Pi(w) &\underbrace{- \int_{\Gamma_{w}} V(w)(w - \bar w) d\Gamma + \int_{\Gamma_{\theta}} M_{n}(w)(\theta_n(w) - \bar \theta_n) d\Gamma - P(w)(w - \bar w)\vert_{\boldsymbol x \in c_w}}_{\textrm{Variational terms}} \\
-		&\underbrace{+ \frac{\alpha_w}{2} \int_{\Gamma_{w}} (w - \bar w)^2 d\Gamma + \frac{\alpha_\theta}{2} \int_{\Gamma_{\theta}} (\theta_n(w) - \bar \theta_n)^2 d\Gamma + \frac{\alpha_c}{2} (w - \bar w)^2\vert_{\boldsymbol x \in c_w}}_{\textrm{Stabilized terms}}
+		\bar \Pi(w) = \Pi(w) &\underbrace{- \int_{\Gamma_{w}} V(w)(w - \bar w) d\Gamma + \int_{\Gamma_{\theta}} M(w)(\theta(w) - \bar \theta) d\Gamma - P(w)(w - \bar w)\vert_{\boldsymbol x \in c_w}}_{\textrm{Variational terms}} \\
+		&\underbrace{+ \frac{\alpha_w}{2} \int_{\Gamma_{w}} (w - \bar w)^2 d\Gamma + \frac{\alpha_\theta}{2} \int_{\Gamma_{\theta}} (\theta(w) - \bar \theta)^2 d\Gamma + \frac{\alpha_c}{2} (w - \bar w)^2\vert_{\boldsymbol x \in c_w}}_{\textrm{Stabilized terms}}
 	\end{aligned}
 \end{equation}
 where $\alpha_w\propto\bar D/h^{3}$, $\alpha_\theta\propto\bar D/h$ and $\alpha_c\propto\bar D/h^{2}$ are the artificial stabilization parameters, which are determined empirically.
@@ -195,20 +194,20 @@ where $\bar a$ and $\bar f$ denote the bilinear and linear functionals associate
 	\begin{aligned}
 		\bar a(\delta w^h, w^h) ={}& a(\delta w^h, w^h)
 		- \int_{\Gamma_{w}} \left( V(\delta w^h) w^h + V(w^h) \delta w^h \right) d\Gamma \\
-		&+ \int_{\Gamma_{\theta}} \left( M_n(\delta w^h) \theta_n(w^h) + M_n(w^h) \theta_n(\delta w^h) \right) d\Gamma 
+		&+ \int_{\Gamma_{\theta}} \left( M(\delta w^h) \theta(w^h) + M(w^h) \theta(\delta w^h) \right) d\Gamma 
 		- \left( P(\delta w^h) w^h + P(w^h) \delta w^h \right) \vert_{\boldsymbol x \in c_w} \\
-		&+ \alpha_w \int_{\Gamma_{w}} \delta w^h w^h d\Gamma + \alpha_\theta \int_{\Gamma_{\theta}} \theta_n(\delta w^h) \theta_n(w^h) d\Gamma + \alpha_c \delta w^h w^h \vert_{\boldsymbol x \in c_w}
+		&+ \alpha_w \int_{\Gamma_{w}} \delta w^h w^h d\Gamma + \alpha_\theta \int_{\Gamma_{\theta}} \theta(\delta w^h) \theta(w^h) d\Gamma + \alpha_c \delta w^h w^h \vert_{\boldsymbol x \in c_w}
 	\end{aligned}
 \end{equation}
 \begin{equation}\label{nitsche_linear}
 	\begin{aligned}
 		\bar f(\delta w^h) ={}& f(\delta w^h)
-		+ \int_{\Gamma_{w}} V(\delta w^h) \bar w d\Gamma
-		- \int_{\Gamma_{\theta}} M_n(\delta w^h) \bar \theta_n d\Gamma
-		+ P(\delta w^h) \bar w \vert_{\boldsymbol x \in c_w} \\
-		&- \alpha_w \int_{\Gamma_{w}} \delta w^h \bar w d\Gamma
-		- \alpha_\theta \int_{\Gamma_{\theta}} \theta_n(\delta w^h) \bar \theta_n d\Gamma
-		- \alpha_c \delta w^h \bar w \vert_{\boldsymbol x \in c_w}
+		- \int_{\Gamma_{w}} V(\delta w^h) \bar w d\Gamma
+		+ \int_{\Gamma_{\theta}} M(\delta w^h) \bar \theta d\Gamma
+		- P(\delta w^h) \bar w \vert_{\boldsymbol x \in c_w} \\
+		&+ \alpha_w \int_{\Gamma_{w}} \delta w^h \bar w d\Gamma
+		+ \alpha_\theta \int_{\Gamma_{\theta}} \theta(\delta w^h) \bar \theta d\Gamma
+		+ \alpha_c \delta w^h \bar w \vert_{\boldsymbol x \in c_w}
 	\end{aligned}
 \end{equation}
 
@@ -230,6 +229,8 @@ Consequently, the bilinear form $\bar a$ is both coercive and continuous, i.e. t
 However, the combination of Gauss quadrature rule and Nitsche method has its problem.
 First, the Gauss quadrature rule can not reach the designated accuracy \cite{}, because the overlapping of support size of meshfree shape functions, the shape functions are always the piecewise polynomials and the Gauss quadrature rule is only suitable for polynomial integrals.
 As a consequence, the Nitsche formulation can only ensure Eq. \eqref{nitsche_consistency} up to a limited order $q$, which is equal to the order of integration consistency of the quadrature scheme, instead of for an arbitrary order.
+For traditional Galerkin meshfree method, the frequently-used Gauss quadrature rules only meet linear variational consistency with $q=1$, while the linear variational consistency is naturally equipped for Kirchhoff palte formualtions.
+
 Second, as can be found in the weak form of Nitsche method, the operation requires the calculation of third derivatives of shape function to evaluate $V$, and the higher-order derivatives of shape functions are complicated and costly.
 For the exact solution $w\in H_2$, which is generally not a polynomial, the residual of Eq. \eqref{nitsche_weakform} therefore does not vanish.
 To estimate this residual, the $q$-th order Lagrange interpolant $\mathcal T^{q}w$ of $w$ based upon the integration cells is introduced, which satisfies the following estimate \cite{ref50}:
