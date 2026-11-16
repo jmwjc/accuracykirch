@@ -20,7 +20,7 @@ The corresponding boundary value problem reads
 The Hellinger--Reissner functional of the Kirchhoff plate then reads
 \begin{equation}\label{hr_functional}
 	\begin{aligned}
-		\Pi(\boldsymbol M,w)={}&\int_\Omega \frac{1}{2} M_{ij} C^{-1}_{ijkl} M_{kl} d\Omega
+		\Pi(\boldsymbol M,w)=&\int_\Omega \frac{1}{2} M_{ij} C^{-1}_{ijkl} M_{kl} d\Omega
 		-\int_{\Gamma_{w}} V(\boldsymbol M) \bar w d\Gamma
 		+\int_{\Gamma_{\theta}} M(\boldsymbol M) \bar\theta d\Gamma
 		-P(\boldsymbol M)\bar w\vert_{\boldsymbol x\in c_w} \\
@@ -37,22 +37,32 @@ where $C^{-1}_{ijkl}$ is the inverse of the elasticity tensor $C_{ijkl}$ given i
 Taking the variation of Eq. \eqref{hr_functional} with respect to both $\boldsymbol M$ and $w$, and requiring $\delta\Pi=0$ for arbitrary $\delta\boldsymbol M$ and $\delta w$, yields
 \begin{equation}\label{hr_variation_M}
 	\begin{aligned}
-		&\int_\Omega \delta M_{ij} C^{-1}_{ijkl} M_{kl} d\Omega
-		+\int_\Omega w\,\delta M_{ij,ij}d\Omega
+		-\int_\Omega \delta M_{ij} C^{-1}_{ijkl} M_{kl} d\Omega
+		- \int_\Omega \delta M_{ij,ij}w d\Omega  
+		+&\int_{\Gamma}V(\delta\boldsymbol M)wd\Gamma
+		-\int_{\Gamma}M(\delta\boldsymbol M)\theta(w)d\Gamma
+		+P(\delta\boldsymbol M)w\vert_{\boldsymbol x\in c} \\
+		-&\int_{\Gamma_{w}}V(\delta\boldsymbol M)wd\Gamma
+		+\int_{\Gamma_{\theta}}M(\delta\boldsymbol M)\theta(w)d\Gamma
+		-P(\delta\boldsymbol M)w\vert_{\boldsymbol x\in c_w} \\=&
 		-\int_{\Gamma_{w}}V(\delta\boldsymbol M)\bar w d\Gamma
 		+\int_{\Gamma_{\theta}}M(\delta\boldsymbol M)\bar\theta d\Gamma
 		-P(\delta\boldsymbol M)\bar w\vert_{\boldsymbol x\in c_w} \\
-		&\qquad+\int_{\Gamma_{M}}\theta(w)M(\delta\boldsymbol M)d\Gamma
-		-\int_{\Gamma_{V}}w V(\delta\boldsymbol M)d\Gamma
-		-w P(\delta\boldsymbol M)\vert_{\boldsymbol x\in c_P}=0
 	\end{aligned}
 \end{equation}
 \begin{equation}\label{hr_variation_w}
 	\begin{aligned}
-		&\int_\Omega \delta w\left(M_{ij,ij}+\bar q\right)d\Omega
-		+\int_{\Gamma_{M}}\theta(\delta w)\left(M(\boldsymbol M)-\bar M\right)d\Gamma
-		-\int_{\Gamma_{V}}\delta w\left(V(\boldsymbol M)-\bar V\right)d\Gamma \\
-		&\qquad-\delta w\left(P(\boldsymbol M)-\bar P\right)\vert_{\boldsymbol x\in c_P}=0
+		-\int_\Omega \delta wM_{ij,ij}d\Omega
+		+&\int_{\Gamma}\delta wV(\boldsymbol M)d\Gamma
+		-\int_{\Gamma}\theta(\delta w)M(\boldsymbol M)d\Gamma
+		+\delta w P(\boldsymbol M)\vert_{\boldsymbol x\in c} \\
+		-&\int_{\Gamma_{w}}\delta wV(\boldsymbol M)d\Gamma
+		+\int_{\Gamma_{\theta}}\theta(\delta w)M(\boldsymbol M)d\Gamma
+		-\delta w P(\boldsymbol M)\vert_{\boldsymbol x\in c_w} \\ =&
+		\int_{\Gamma_{V}}\delta w\bar Vd\Gamma
+		-\int_{\Gamma_{M}}\theta(\delta w)\bar Md\Gamma
+		+\delta w\bar P\vert_{\boldsymbol x\in c_P}
+		+\int_\Omega \delta w\bar qd\Omega
 	\end{aligned}
 \end{equation}
 It is noted that the natural boundary conditions in Eq. \eqref{hr_strong} are now enforced in the sense of the Lagrange multiplier method, with the deflection $w$ acting as the multiplier.

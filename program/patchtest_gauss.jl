@@ -34,7 +34,7 @@
 using ApproxOperator
 import ApproxOperator: AbstractElement
 import ApproxOperator.GmshImport: getPhysicalGroups, get𝑿ᵢ, getElements
-import ApproxOperator.KirchhoffPlate: ∫κᵢⱼMᵢⱼdΩ, ∫wqdΩ, ∫VgdΓ, ∫MₙₙθdΓ, L₂, H₁, Hₑ
+import ApproxOperator.KirchhoffPlate: ∫κᵢⱼMᵢⱼdΩ, ∫wqdΩ, ∫VgdΓ, ∫MₙₙθdΓ, ΔMₙₛg, L₂, H₁, Hₑ
 import Gmsh: gmsh
 
 using LinearAlgebra
@@ -43,13 +43,15 @@ using Printf
 # ---------------------------------------------------------------------------
 # User parameters
 # ---------------------------------------------------------------------------
-const p           = 2                 # 2, 3 or 4
+const p           = 2                 # RK degree: 2, 3 or 4
+const n           = p                 # exact solution degree: w = (x+y+1)^n
 const meshfile    = joinpath(@__DIR__, "msh", "patchtest_nonuniform.msh")
 const orders      = [2, 4, 6, 8]      # Gauss orders
 const D           = 2.0e4             # bending stiffness
 const ν           = 0.3               # Poisson ratio
 const β1factor    = 1.0e3             # β1 = factor * D / h^3
 const β2factor    = 1.0e3             # β2 = factor * D / h
+const βcfactor    = 1.0e3             # βc = factor * D / h^2  (corner displacement)
 const post_order  = 10                # quadrature order for error evaluation
 
 # ---------------------------------------------------------------------------
@@ -57,25 +59,58 @@ const post_order  = 10                # quadrature order for error evaluation
 # ---------------------------------------------------------------------------
 @inline f(x, y) = x + y + 1.0
 
-w_exact(x, y, z)   = f(x, y)^p
-wx_exact(x, y, z)  = p * f(x, y)^(p - 1)
-wy_exact(x, y, z)  = p * f(x, y)^(p - 1)
-wxx_exact(x, y, z) = p * (p - 1) * f(x, y)^(p - 2)
-wxy_exact(x, y, z) = p * (p - 1) * f(x, y)^(p - 2)
-wyy_exact(x, y, z) = p * (p - 1) * f(x, y)^(p - 2)
+w_exact(x, y, z)   = f(x, y)^n
+wx_exact(x, y, z)  = n * f(x, y)^(n - 1)
+wy_exact(x, y, z)  = n * f(x, y)^(n - 1)
+wxx_exact(x, y, z) = n * (n - 1) * f(x, y)^(n - 2)
+wxy_exact(x, y, z) = n * (n - 1) * f(x, y)^(n - 2)
+wyy_exact(x, y, z) = n * (n - 1) * f(x, y)^(n - 2)
 
-# q = D Δ²w.  For p < 4 the biharmonic is zero.
-q_exact(x, y, z) = p >= 4 ?
-    D * 4.0 * p * (p - 1) * (p - 2) * (p - 3) * f(x, y)^(p - 4) : 0.0
+# q = D Δ²w.  For n < 4 the biharmonic is zero.
+q_exact(x, y, z) = n >= 4 ?
+    D * 4.0 * n * (n - 1) * (n - 2) * (n - 3) * f(x, y)^(n - 4) : 0.0
 
 # Normal derivative on a boundary with outward normal (n1,n2).
-θ_exact(x, y, z, n1, n2) = p * f(x, y)^(p - 1) * (n1 + n2)
+θ_exact(x, y, z, n1, n2) = n * f(x, y)^(n - 1) * (n1 + n2)
+
+# 5-point Gauss-Lobatto rule, used only for the corner (point) term.
+const ξq = [-1.0, -sqrt(3.0/7.0), 0.0, sqrt(3.0/7.0), 1.0]
+const wq = [1.0/10.0, 49.0/90.0, 32.0/45.0, 49.0/90.0, 1.0/10.0]
+const GL5 = (Float64[
+    -1.0, 0.0, 0.0,
+    -sqrt(3.0/7.0), 0.0, 0.0,
+     0.0, 0.0, 0.0,
+     sqrt(3.0/7.0), 0.0, 0.0,
+     1.0, 0.0, 0.0,
+], wq)
+
+# Fill the corner-jump coefficients expected by KirchhoffPlate.ΔMₙₛg on a
+# meshfree boundary element.  The package's meshfree importer provides ξ.Δ
+# and the normals; ΔMₙₛg additionally reads the endpoint combinations
+# ξ.Δn₁s₁, ξ.Δn₁s₂n₂s₁, ξ.Δn₂s₂.
+function add_corner_delta!(Γ)
+    isempty(Γ) && return Γ
+    data = getfield(Γ[1].𝓖[1], :data)
+    data[:Δn₁s₁] = (1, Float64[])
+    data[:Δn₁s₂n₂s₁] = (1, Float64[])
+    data[:Δn₂s₂] = (1, Float64[])
+    for ξ in Γ[1].𝓖
+        Δ = ξ.Δ
+        n₁ = ξ.n₁; n₂ = ξ.n₂
+        s₁ = -n₂; s₂ = n₁
+        push!(data[:Δn₁s₁][2], Δ*n₁*s₁)
+        push!(data[:Δn₁s₂n₂s₁][2], Δ*(n₁*s₂ + n₂*s₁))
+        push!(data[:Δn₂s₂][2], Δ*n₂*s₂)
+    end
+    return Γ
+end
 
 # ---------------------------------------------------------------------------
 # One patch-test run
 # ---------------------------------------------------------------------------
 function run_patchtest(order::Int)
     p in (2, 3, 4) || error("p must be 2, 3 or 4.")
+    0 <= n <= p || error("the exact solution degree must satisfy 0 <= n <= p.")
 
     # Suppress the Gmsh and importer summaries; only the result table is shown.
     return redirect_stdout(devnull) do
@@ -98,9 +133,9 @@ function run_patchtest(order::Int)
                      :s₃ => fill(support, nₚ))
 
         sp = RegularGrid(x, y, z; n = 3, γ = 5)
-        type = p == 2 ? ReproducingKernel{:Quadratic2D,:□,:CubicSpline} :
-               p == 3 ? ReproducingKernel{:Cubic2D,:□,:CubicSpline} :
-                        ReproducingKernel{:Quartic2D,:□,:CubicSpline}
+        type = p == 2 ? ReproducingKernel{:Quadratic2D,:□,:QuinticSpline} :
+               p == 3 ? ReproducingKernel{:Cubic2D,:□,:QuinticSpline} :
+                        ReproducingKernel{:Quartic2D,:□,:QuinticSpline}
 
         # --- domain: standard Gauss integration ----------------------------
         Ω = getElements(nodes, entities["Ω"], type, order, sp)
@@ -118,6 +153,7 @@ function run_patchtest(order::Int)
         # --- boundary: Nitsche, one Gmsh edge at a time --------------------
         β1 = β1factor * D / h^3
         β2 = β2factor * D / h
+        βc = βcfactor * D / h^2
         ngΓ = 0
 
         for tag in entities["Γᵍ"].second
@@ -126,11 +162,20 @@ function run_patchtest(order::Int)
             prescribe!(Γ, :g => w_exact, :θ => θ_exact)
             set∇̂³𝝭!(Γ)
 
-            # Package Nitsche operators:
+            # Package Nitsche operators on the edge:
             #   displacement : ∫VgdΓ       (needs set∇̂³𝝭!)
             #   rotation     : ∫MₙₙθdΓ     (needs set∇²𝝭!, included in ∇̂³)
             (∫VgdΓ   => Γ)(k, f; D = D, ν = ν, α = β1)
             (∫MₙₙθdΓ => Γ)(k, f; D = D, ν = ν, α = β2)
+
+            # Corner displacement term: ΔMₙₛg is a point contribution, so
+            # use the Lobatto rule, whose endpoints carry ξ.Δ ≠ 0.
+            Γc = getElements(nodes, 1 => [tag], type, GL5, sp;
+                             normal = true, delta = true)
+            add_corner_delta!(Γc)
+            prescribe!(Γc, :g => w_exact)
+            set∇²𝝭!(Γc)
+            (ΔMₙₛg => Γc)(k, f; D = D, ν = ν, α = βc)
         end
 
         # Residual of the discrete equations for the exact nodal vector.
@@ -166,10 +211,10 @@ end
 # Main: Gauss-order sweep on the fixed non-uniform mesh
 # ---------------------------------------------------------------------------
 println("Gauss-integration Galerkin meshfree patch test (non-uniform mesh)")
-@printf("  p = %d, mesh = %s\n", p, basename(meshfile))
+@printf("  p = %d, n = %d, mesh = %s\n", p, n, basename(meshfile))
 @printf("  D = %.3e, nu = %.2f\n", D, ν)
-@printf("  Nitsche: beta1 = %.1e * D/h^3, beta2 = %.1e * D/h\n",
-        β1factor, β2factor)
+@printf("  Nitsche: beta1 = %.1e * D/h^3, beta2 = %.1e * D/h, betac = %.1e * D/h^2\n",
+        β1factor, β2factor, βcfactor)
 @printf("  support = %.1f h, post-processing order = %d\n",
         p == 2 ? 3.0 : p == 3 ? 4.0 : 5.0, post_order)
 println()

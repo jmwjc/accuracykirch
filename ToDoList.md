@@ -2,7 +2,7 @@
 ## Manuscript
 - [x] Split the section 2 into 2 sections.
 - [x] Put the Aubin-Nitsche trick to appendix
-- [ ] Variational consistency test
+- [x] Variational consistency test
 
 
 ## Example
