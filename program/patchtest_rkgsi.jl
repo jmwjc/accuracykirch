@@ -20,6 +20,10 @@
 #     julia program/patchtest_rkgsi.jl
 # ---------------------------------------------------------------------------
 
+# macOS: Homebrew Julia, Gmsh and UMFPACK may each bundle libomp.
+# Allow the duplicate runtime; see OMP Error #15.
+ENV["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
 using ApproxOperator
 import ApproxOperator: AbstractElement, get𝑛𝑝
 import ApproxOperator.GmshImport:
@@ -30,6 +34,7 @@ import ApproxOperator.KirchhoffPlate:
     ∫VwdΓ, ∫MθdΓ, wP,
     ∫wVdΓ, ∫θₙMₙₙdΓ, wΔMₙₛ,
     ∫wqdΩ, L₂, H₁, Hₑ
+import ApproxOperator.MindlinPlate: ∫αwwdΓ
 import Gmsh: gmsh
 
 using LinearAlgebra
@@ -38,9 +43,9 @@ using Printf
 # ---------------------------------------------------------------------------
 # Parameters
 # ---------------------------------------------------------------------------
-const p          = 3                    # RK basis degree: 2, 3 or 4
-const n          = 3                    # exact solution order: w = (x+y+1)^n
-const q          = 1                    # M basis degree: 0 constant, 1 linear, 2 quadratic
+const p          = 2                    # RK basis degree: 2, 3 or 4
+const n          = 1                    # exact solution order: w = (x+y+1)^n
+const q          = 0                    # M basis degree: 0 constant, 1 linear, 2 quadratic
 const meshfile   = joinpath(@__DIR__, "msh", "patchtest_rkgsi.msh")
 const D          = 1.0
 const ν          = 0.3
@@ -138,6 +143,7 @@ area = (maximum(x) - minimum(x)) * (maximum(y) - minimum(y))
 h = sqrt(area / nʷ)
 
 support = (p == 2 ? 3.0 : p == 3 ? 4.0 : 5.0) * h
+αw = 1.0e3 * D / h^3
 push!(nodes, :s₁ => fill(support, nʷ),
              :s₂ => fill(support, nʷ),
              :s₃ => fill(support, nʷ))
@@ -224,7 +230,7 @@ elements_Γ²_m = getElements(entities["Γ²"], entities["Γ"], elements_Γ_m)
 elements_Γ³_m = getElements(entities["Γ³"], entities["Γ"], elements_Γ_m)
 elements_Γ⁴_m = getElements(entities["Γ⁴"], entities["Γ"], elements_Γ_m)
 for e in (elements_Γ¹_w, elements_Γ²_w, elements_Γ³_w, elements_Γ⁴_w)
-    prescribe!(e, :w => w, :θ => θ)
+    prescribe!(e, :w => w, :θ => θ, :g => w)
     set∇𝝭!(e)
 end
 elements_Γᵍ_w = elements_Γ¹_w ∪ elements_Γ²_w ∪ elements_Γ³_w ∪ elements_Γ⁴_w
@@ -237,9 +243,17 @@ elements_Γᵍ_m = elements_Γ¹_m ∪ elements_Γ²_m ∪ elements_Γ³_m ∪ e
 𝑎ᵐʷ(kᵐʷ, fᵐ)
 
 # ---------------------------------------------------------------------------
+# Penalty stabilization of the w block for q = 0
+# ---------------------------------------------------------------------------
+kʷʷ = zeros(nʷ, nʷ)
+if q == 0
+    (∫αwwdΓ => elements_Γᵍ_w)(kʷʷ, fʷ; α = αw)
+end
+
+# ---------------------------------------------------------------------------
 # Solve the full saddle-point system
 # ---------------------------------------------------------------------------
-d = [kᵐᵐ kᵐʷ; kᵐʷ' zeros(nʷ, nʷ)] \ [fᵐ; fʷ]
+d = [kᵐᵐ kᵐʷ; kᵐʷ' kʷʷ] \ [fᵐ; fʷ]
 w_sol = d[3*nᵐ+1:3*nᵐ+nʷ]
 
 # ---------------------------------------------------------------------------
@@ -264,6 +278,7 @@ He = Hₑ(Ωp; D = D, ν = ν)
         p, n, q, nₑ, nʷ, 3*nᵐ)
 @printf("  support = %.1f h, domain order = %d, post order = %d\n",
         p == 2 ? 3.0 : p == 3 ? 4.0 : 5.0, order, post_order)
+@printf("  q = %d, penalty αw = %.3e\n", q, q == 0 ? αw : 0.0)
 @printf("  L2 = %.6e   H1 = %.6e   He = %.6e\n", L2, H1, He)
 
 gmsh.finalize()
