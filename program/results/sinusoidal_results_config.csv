@@ -1,0 +1,8 @@
+item,value
+D,1.0
+nu,0.3
+L,1.0
+q0,389.6363641360097
+q definition,q = piecewise moment degree; integration order = q + 2
+error norm,H2 = energy norm of M - M^h
+support,p=2: 2.5h; p=3: 3.5h; p=4: 4.7h

@@ -1,0 +1,9 @@
+item,value
+method,Gauss integration + Nitsche
+D,1.0
+nu,0.3
+L,1.0
+q0,389.6363641360097
+error norm,H2 = He = relative energy norm of w - w^h
+support,p=2: 2.5h; p=3: 3.5h; p=4: 4.5h
+Nitsche,"β1 = 1e3 D/h^3, βc = 1e3 D/h^2; w=0 only"
