@@ -1,36 +1,19 @@
-%% ---------------------------------------------------------------------------
-%% Main file -- Accuracy analysis of Kirchhoff plate theory
-%% Typeset with the Elsevier CAS single-column class (cas-sc.cls).
-%% ---------------------------------------------------------------------------
-%% Document class
 %\documentclass[a4paper,fleqn,longmktitle]{cas-sc}
 \documentclass[a4paper,fleqn]{cas-sc}
 
-%% ---------------------------------------------------------------------------
-%% Bibliography: numeric citations, sorted and compressed (e.g. [1-7])
-%% ---------------------------------------------------------------------------
 %\usepackage[numbers]{natbib}
 \usepackage[numbers,sort&compress]{natbib}
 
-%% ---------------------------------------------------------------------------
-%% Mathematics
-%% ---------------------------------------------------------------------------
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsfonts}
 \usepackage{bm}
 
-%% ---------------------------------------------------------------------------
-%% Graphics, tables and lists
-%% ---------------------------------------------------------------------------
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{multirow}
 
-%% ---------------------------------------------------------------------------
-%% Author macros (as in the CAS sample file)
-%% ---------------------------------------------------------------------------
 \def\tsc#1{\csdef{#1}{\textsc{\lowercase{#1}}\xspace}}
 \tsc{WGM}
 \tsc{QE}
@@ -46,9 +29,6 @@
 \shorttitle{Accuracy analysis of Kirchhoff plate theory}
 \shortauthors{H.~Du et~al.}
 
-%% ---------------------------------------------------------------------------
-%% Front matter
-%% ---------------------------------------------------------------------------
 \title[mode = title]{An error estimator of Kirchhoff plate meshfree formulation considering the variational consistency}
 
 %% NOTE: author names, affiliations and funding information were not available
@@ -67,9 +47,6 @@
 
 \cortext[cor1]{Corresponding author}
 
-%% ---------------------------------------------------------------------------
-%% Body -- one file per section
-%% ---------------------------------------------------------------------------
 \input{sections/abstract}
 \maketitle
 
@@ -78,21 +55,17 @@
 \input{sections/error_estimate}
 \input{sections/rkgsi}
 
-%% ---------------------------------------------------------------------------
-%% 4. Numerical results -- one file per example
-%% ---------------------------------------------------------------------------
 \section{Numerical results}\label{sec:numerical}
 
-\input{sections/integration_consistency}
-\input{sections/quadratic_convergence}
-\input{sections/manufactured_beam}
-\input{sections/manufactured_plate}
+\input{sections/sinusoidal.tex}
+\input{sections/circle.tex}
+% \input{sections/integration_consistency}
+% \input{sections/quadratic_convergence}
+% \input{sections/manufactured_beam}
+% \input{sections/manufactured_plate}
 
 \input{sections/conclusions}
 
-%% ---------------------------------------------------------------------------
-%% Bibliography
-%% ---------------------------------------------------------------------------
 \input{sections/references}
 
 % \appendix
