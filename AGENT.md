@@ -61,7 +61,8 @@ Continuity follows from the Cauchy--Schwarz inequality. Coercivity follows from 
 cd manuscript && latexmk -xelatex -auxdir=.aux -interaction=nonstopmode -file-line-error -synctex=1 main.tex
 ```
 
-- 引擎固定 XeLaTeX，参数固定为上面这一组；不得再加入 `-pdf`、`-draftmode`、`-outdir`、`--no-focus` 等开关。其中 `-pdf` 会与 `-xelatex` 冲突、`-outdir` 会让 texlab 找不到文件、`--no-focus` 是 sioyek 的参数（只应出现在 `forwardSearch.args` 里，写作 `--nofocus`）。
+- 引擎固定 XeLaTeX，参数固定为上面这一组；不得再加入 `-pdf`、`-draftmode`、`-outdir` 等开关（`-pdf` 与 `-xelatex` 冲突、`-outdir` 会让 texlab 找不到文件）。阅读器相关的开关（sioyek 的 `--nofocus`、galleypdf 的 `-g`）**只能**出现在 `forwardSearch.args` 里：写进 `build.args` 会被当成 latexmk 参数，报 `Bad options specified`，整次编译直接失败。
+- 前向搜索固定用 galleypdf：`executable = "galleypdf"`，`args = ["forward", "-g", "-l", "%l", "-s", "%f", "%p"]`，其中 `-g` 表示不把 Galley 提到前台。**不要加 `%c`**：texlab 对 `%c` 的替换会把其后的参数粘成一个（实测收到 `20--ccc--s//…`），列号也非必需。占位符只用 `%f`、`%l`、`%p`。
 - 中间文件固定落 `manuscript/.aux/`（`auxDirectory = ".aux"`）；`main.pdf` 与 `main.synctex.gz` 固定落 `manuscript/`（`pdfDirectory = "."`）。这两处位置一旦改动，正向/反向搜索与 texlab 诊断即失效。
 - 日常校查用同一套 XeLaTeX 参数、加 `-no-pdf` 跑两遍，**不碰 `main.pdf`**：
 
